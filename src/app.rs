@@ -16,6 +16,10 @@ pub struct App {
     height: u32,
     title: String,
     is_resizable: bool,
+    is_visible: bool,
+    is_minimized: bool,
+    is_maximized: bool,
+    is_decorated: bool,
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
 }
 
@@ -27,6 +31,10 @@ impl App {
             height: DEFAULT_HEIGHT,
             title: String::from(DEFAULT_TITLE),
             is_resizable: false,
+            is_visible: true,
+            is_minimized: false,
+            is_maximized: false,
+            is_decorated: true,
             current_context: None,
         }
     }
@@ -40,6 +48,10 @@ impl App {
             .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
+    // Return current App screen width
+    pub fn width(&mut self) -> u32 {
+        return self.width;
+    }
 
     // Set App screen height
     pub fn set_height(&mut self, height: u32) {
@@ -49,6 +61,10 @@ impl App {
             .unwrap()
             .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
+    }
+    // Return current App screen height
+    pub fn height(&mut self) -> u32 {
+        return self.height;
     }
 
     // Set App screen width and height
@@ -71,6 +87,10 @@ impl App {
             .window()
             .set_title(&self.title);
     }
+    // Return App screen title
+    pub fn title(&mut self) -> &str {
+        return &self.title;
+    }
 
     // Set whether App is resizable
     pub fn set_resizable(&mut self, is_resizable: bool) {
@@ -81,6 +101,66 @@ impl App {
             .window()
             .set_resizable(self.is_resizable);
     }
+    // Return whether App is resizable
+    pub fn is_resizable(&mut self) -> bool {
+        return self.is_resizable;
+    }
+
+    // Set whether App is visible
+    pub fn set_visible(&mut self, is_visible: bool) {
+        self.is_visible = is_visible;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_visible(self.is_visible);
+    }
+    // Return whether App is visible
+    pub fn is_visible(&mut self) -> bool {
+        return self.is_visible;
+    }
+
+    // Set whether App is minimized
+    pub fn set_minimized(&mut self, is_minimized: bool) {
+        self.is_minimized = is_minimized;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_minimized(self.is_minimized);
+    }
+    // Return whether App is minimized
+    pub fn is_minimized(&mut self) -> bool {
+        return self.is_minimized;
+    }
+
+    // Set whether App is maximized
+    pub fn set_maximized(&mut self, is_maximized: bool) {
+        self.is_minimized = is_maximized;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_minimized(self.is_maximized);
+    }
+    // Return whether App is maximized
+    pub fn is_maximized(&mut self) -> bool {
+        return self.is_maximized;
+    }
+
+    // Set whether App is decorated
+    pub fn set_decorated(&mut self, is_decorated: bool) {
+        self.is_decorated = is_decorated;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_decorations(self.is_decorated);
+    }
+    // Return whether App is decorated
+    pub fn is_decorated(&mut self) -> bool {
+        return self.is_decorated;
+    }
 
     // Run App
     pub fn run(
@@ -90,17 +170,35 @@ impl App {
         render: Option<fn(&mut App)>,
         exit: Option<fn(&mut App)>,
     ) {
-        // Create event loop and window builder
+        // Create event loop for window context
         let event_loop = EventLoop::new();
-        let window_builder = WindowBuilder::new()
-            .with_title(&self.title)
-            .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height));
+        // Create and set a new window context
+        self.current_context = Some(unsafe {
+            ContextBuilder::new()
+                .build_windowed(
+                    WindowBuilder::new()
+                        .with_title(&self.title)
+                        .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height))
+                        .with_resizable(self.is_resizable)
+                        .with_visible(self.is_visible)
+                        .with_decorations(self.is_decorated),
+                    &event_loop,
+                )
+                .unwrap()
+                .make_current()
+                .unwrap()
+        });
 
-        // Create context for current window
-        let new_context = ContextBuilder::new()
-            .build_windowed(window_builder, &event_loop)
-            .unwrap();
-        self.current_context = Some(unsafe { new_context.make_current().unwrap() });
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_minimized(self.is_minimized);
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_maximized(self.is_maximized);
 
         // User-defined initialization
         if let Some(init) = init {
