@@ -1,2 +1,2 @@
 # sidekick
- Rust-powered, Vulkan-based 2D game framework
+ Rust-powered, OpenGL 2D game framework
