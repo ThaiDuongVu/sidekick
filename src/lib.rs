@@ -3,3 +3,4 @@ pub mod time;
 pub mod input;
 pub mod math;
 pub mod debug;
+pub mod test;

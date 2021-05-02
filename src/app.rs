@@ -1,16 +1,28 @@
-extern crate glutin;
-
+use crate::input::Input;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
-use glutin::window::WindowBuilder;
+use glutin::window::{UserAttentionType, WindowBuilder};
 use glutin::ContextBuilder;
+
+// Types of attention to request user
+pub enum AttentionType {
+    Critical,
+    Informational,
+}
 
 // Default values for window initialization
 const DEFAULT_WIDTH: u32 = 800;
 const DEFAULT_HEIGHT: u32 = 600;
 const DEFAULT_TITLE: &str = "Sidekick App";
+const DEFAULT_RESIZABILITY: bool = false;
+const DEFAULT_VISIBILITY: bool = true;
+const DEFAULT_MINIMIZATION: bool = false;
+const DEFAULT_MAXIMIZATION: bool = false;
+const DEFAULT_DECORATION: bool = true;
+const DEFAULT_ALWAYS_ON_TOP: bool = false;
 
+// Main game App, everything is wrapped in here
 pub struct App {
     width: u32,
     height: u32,
@@ -20,7 +32,10 @@ pub struct App {
     is_minimized: bool,
     is_maximized: bool,
     is_decorated: bool,
+    is_always_on_top: bool,
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
+    control_flow: Option<*mut ControlFlow>,
+    pub input: Input,
 }
 
 impl App {
@@ -30,12 +45,15 @@ impl App {
             width: DEFAULT_WIDTH,
             height: DEFAULT_HEIGHT,
             title: String::from(DEFAULT_TITLE),
-            is_resizable: false,
-            is_visible: true,
-            is_minimized: false,
-            is_maximized: false,
-            is_decorated: true,
+            is_resizable: DEFAULT_RESIZABILITY,
+            is_visible: DEFAULT_VISIBILITY,
+            is_minimized: DEFAULT_MINIMIZATION,
+            is_maximized: DEFAULT_MAXIMIZATION,
+            is_decorated: DEFAULT_DECORATION,
+            is_always_on_top: DEFAULT_ALWAYS_ON_TOP,
             current_context: None,
+            control_flow: None,
+            input: Input::new(),
         }
     }
 
@@ -162,6 +180,39 @@ impl App {
         return self.is_decorated;
     }
 
+    // Set whether App is always on top
+    pub fn set_always_on_top(&mut self, is_always_on_top: bool) {
+        self.is_always_on_top = is_always_on_top;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_always_on_top(self.is_always_on_top);
+    }
+    // Return whether App is always on top
+    pub fn is_always_on_top(&self) -> bool {
+        return self.is_always_on_top;
+    }
+
+    // App request for user attention
+    pub fn request_attention(&mut self, attention_type: AttentionType) {
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .request_user_attention(match attention_type {
+                AttentionType::Critical => Some(UserAttentionType::Critical),
+                AttentionType::Informational => Some(UserAttentionType::Informational),
+            });
+    }
+
+    // Quit App
+    pub fn quit(&mut self) {
+        if let Some(control_flow) = self.control_flow {
+            unsafe { *control_flow = ControlFlow::Exit }
+        }
+    }
+
     // Run App
     pub fn run(
         mut self,
@@ -208,6 +259,8 @@ impl App {
         // Main program loop
         event_loop.run(move |event, _, control_flow| {
             *control_flow = ControlFlow::Wait;
+            self.control_flow = Some(control_flow);
+
             // User-defined update
             if let Some(update) = update {
                 update(&mut self);
@@ -223,7 +276,18 @@ impl App {
                 }
                 Event::WindowEvent { event, .. } => match event {
                     // WindowEvent::Resized(physical_size) => new_context.resize(physical_size),
-                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                    WindowEvent::KeyboardInput {
+                        device_id: _,
+                        input,
+                        is_synthetic: _,
+                    } => {
+                        if input.state == glutin::event::ElementState::Pressed {
+                            self.input.current_key_down = input.scancode;
+                        } else {
+                            self.input.current_key_down = 0;
+                        }
+                    }
+                    WindowEvent::CloseRequested => self.quit(),
                     _ => (),
                 },
                 Event::RedrawRequested(_) => {
