@@ -21,6 +21,8 @@ const DEFAULT_MINIMIZATION: bool = false;
 const DEFAULT_MAXIMIZATION: bool = false;
 const DEFAULT_DECORATION: bool = true;
 const DEFAULT_ALWAYS_ON_TOP: bool = false;
+const DEFAULT_CURSOR_CONFINEMENT: bool = false;
+const DEFAULT_CURSOR_VISIBILITY: bool = true;
 
 // Main game App, everything is wrapped in here
 pub struct App {
@@ -33,6 +35,8 @@ pub struct App {
     is_maximized: bool,
     is_decorated: bool,
     is_always_on_top: bool,
+    is_cursor_confined: bool,
+    is_cursor_visible: bool,
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
@@ -51,6 +55,8 @@ impl App {
             is_maximized: DEFAULT_MAXIMIZATION,
             is_decorated: DEFAULT_DECORATION,
             is_always_on_top: DEFAULT_ALWAYS_ON_TOP,
+            is_cursor_confined: DEFAULT_CURSOR_CONFINEMENT,
+            is_cursor_visible: DEFAULT_CURSOR_VISIBILITY,
             current_context: None,
             control_flow: None,
             input: Input::new(),
@@ -67,7 +73,7 @@ impl App {
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
     // Return current App screen width
-    pub fn width(&mut self) -> u32 {
+    pub fn width(&self) -> u32 {
         return self.width;
     }
 
@@ -81,7 +87,7 @@ impl App {
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
     // Return current App screen height
-    pub fn height(&mut self) -> u32 {
+    pub fn height(&self) -> u32 {
         return self.height;
     }
 
@@ -106,7 +112,7 @@ impl App {
             .set_title(&self.title);
     }
     // Return App screen title
-    pub fn title(&mut self) -> &str {
+    pub fn title(&self) -> &str {
         return &self.title;
     }
 
@@ -120,7 +126,7 @@ impl App {
             .set_resizable(self.is_resizable);
     }
     // Return whether App is resizable
-    pub fn is_resizable(&mut self) -> bool {
+    pub fn is_resizable(&self) -> bool {
         return self.is_resizable;
     }
 
@@ -134,7 +140,7 @@ impl App {
             .set_visible(self.is_visible);
     }
     // Return whether App is visible
-    pub fn is_visible(&mut self) -> bool {
+    pub fn is_visible(&self) -> bool {
         return self.is_visible;
     }
 
@@ -148,7 +154,7 @@ impl App {
             .set_minimized(self.is_minimized);
     }
     // Return whether App is minimized
-    pub fn is_minimized(&mut self) -> bool {
+    pub fn is_minimized(&self) -> bool {
         return self.is_minimized;
     }
 
@@ -162,7 +168,7 @@ impl App {
             .set_minimized(self.is_maximized);
     }
     // Return whether App is maximized
-    pub fn is_maximized(&mut self) -> bool {
+    pub fn is_maximized(&self) -> bool {
         return self.is_maximized;
     }
 
@@ -176,7 +182,7 @@ impl App {
             .set_decorations(self.is_decorated);
     }
     // Return whether App is decorated
-    pub fn is_decorated(&mut self) -> bool {
+    pub fn is_decorated(&self) -> bool {
         return self.is_decorated;
     }
 
@@ -192,6 +198,41 @@ impl App {
     // Return whether App is always on top
     pub fn is_always_on_top(&self) -> bool {
         return self.is_always_on_top;
+    }
+
+    // Set whether mouse cursor is confined within window bound
+    pub fn set_cursor_confined(&mut self, is_cursor_confined: bool) {
+        self.is_cursor_confined = is_cursor_confined;
+        match self
+            .current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_cursor_grab(self.is_cursor_confined)
+        {
+            Ok(_) => {}
+            Err(err) => {
+                println!("Error when setting cursor confinement: {}", err)
+            }
+        }
+    }
+    // Return whether mouse cursor is confined within window bound
+    pub fn is_cursor_confined(&self) -> bool {
+        return self.is_cursor_confined;
+    }
+
+    // Set whether mouse cursor is visible
+    pub fn set_cursor_visible(&mut self, is_cursor_visible: bool) {
+        self.is_cursor_visible = is_cursor_visible;
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_cursor_visible(self.is_cursor_visible);
+    }
+    // Return whether mouse cursor is visible
+    pub fn is_cursor_visible(&self) -> bool {
+        return self.is_cursor_visible;
     }
 
     // App request for user attention
@@ -223,7 +264,7 @@ impl App {
     ) {
         // Create event loop for window context
         let event_loop = EventLoop::new();
-        // Create and set a new window context
+        // Create a new window context and attach to App
         self.current_context = Some(unsafe {
             ContextBuilder::new()
                 .build_windowed(
@@ -232,24 +273,14 @@ impl App {
                         .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height))
                         .with_resizable(self.is_resizable)
                         .with_visible(self.is_visible)
-                        .with_decorations(self.is_decorated),
+                        .with_decorations(self.is_decorated)
+                        .with_maximized(self.is_maximized),
                     &event_loop,
                 )
                 .unwrap()
                 .make_current()
                 .unwrap()
         });
-
-        self.current_context
-            .as_ref()
-            .unwrap()
-            .window()
-            .set_minimized(self.is_minimized);
-        self.current_context
-            .as_ref()
-            .unwrap()
-            .window()
-            .set_maximized(self.is_maximized);
 
         // User-defined initialization
         if let Some(init) = init {
@@ -283,8 +314,10 @@ impl App {
                     } => {
                         if input.state == glutin::event::ElementState::Pressed {
                             self.input.current_key_down = input.scancode;
+                            self.input.key_down_buffer = input.scancode;
                         } else {
                             self.input.current_key_down = 0;
+                            self.input.key_up_buffer = input.scancode;
                         }
                     }
                     WindowEvent::CloseRequested => self.quit(),

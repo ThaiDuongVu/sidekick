@@ -1,6 +1,8 @@
 // Input manager
 pub struct Input {
     pub current_key_down: u32,
+    pub key_down_buffer: u32,
+    pub key_up_buffer: u32,
 }
 
 // Keyboard keys to check for input
@@ -90,6 +92,8 @@ impl Input {
     pub fn new() -> Self {
         Self {
             current_key_down: 0,
+            key_down_buffer: 0,
+            key_up_buffer: 0,
         }
     }
 
@@ -100,5 +104,22 @@ impl Input {
     // Return whether a key is not being held down
     pub fn is_key_up(&mut self, key: Key) -> bool {
         return self.current_key_down != (key as u32);
+    }
+
+    // Return true for the first frame a key is pressed
+    pub fn on_key_down(&mut self, key: Key) -> bool {
+        if self.key_down_buffer == key as u32 {
+            self.key_down_buffer = 0;
+            return true;
+        }
+        return false;
+    }
+    // Return true for the first frame a key is released
+    pub fn on_key_up(&mut self, key: Key) -> bool {
+        if self.key_up_buffer == key as u32 {
+            self.key_up_buffer = 0;
+            return true;
+        }
+        return false;
     }
 }
