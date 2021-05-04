@@ -1,3 +1,4 @@
+use crate::debug::Debug;
 use crate::input::Input;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, WindowEvent};
@@ -40,6 +41,7 @@ pub struct App {
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
+    pub debug: Debug,
 }
 
 impl App {
@@ -60,6 +62,7 @@ impl App {
             current_context: None,
             control_flow: None,
             input: Input::new(),
+            debug: Debug {},
         }
     }
 
