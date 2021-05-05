@@ -1,7 +1,8 @@
 use crate::debug::Debug;
+use crate::input;
 use crate::input::Input;
 use glutin::dpi::PhysicalSize;
-use glutin::event::{Event, WindowEvent};
+use glutin::event::{ElementState, Event, MouseButton, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{UserAttentionType, WindowBuilder};
 use glutin::ContextBuilder;
@@ -38,6 +39,7 @@ pub struct App {
     is_always_on_top: bool,
     is_cursor_confined: bool,
     is_cursor_visible: bool,
+    is_focused: bool,
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
@@ -59,6 +61,7 @@ impl App {
             is_always_on_top: DEFAULT_ALWAYS_ON_TOP,
             is_cursor_confined: DEFAULT_CURSOR_CONFINEMENT,
             is_cursor_visible: DEFAULT_CURSOR_VISIBILITY,
+            is_focused: true,
             current_context: None,
             control_flow: None,
             input: Input::new(),
@@ -238,6 +241,11 @@ impl App {
         return self.is_cursor_visible;
     }
 
+    // Return whether App is focused
+    pub fn is_focused(&self) -> bool {
+        return self.is_focused;
+    }
+
     // App request for user attention
     pub fn request_attention(&mut self, attention_type: AttentionType) {
         self.current_context
@@ -310,19 +318,84 @@ impl App {
                 }
                 Event::WindowEvent { event, .. } => match event {
                     // WindowEvent::Resized(physical_size) => new_context.resize(physical_size),
+                    // Handle keyboard input
                     WindowEvent::KeyboardInput {
                         device_id: _,
                         input,
                         is_synthetic: _,
                     } => {
-                        if input.state == glutin::event::ElementState::Pressed {
-                            self.input.current_key_down = input.scancode;
+                        if input.state == ElementState::Pressed {
+                            if !self.input.current_keys_down.contains(&input.scancode) {
+                                self.input.current_keys_down.push(input.scancode);
+                            }
                             self.input.key_down_buffer = input.scancode;
                         } else {
-                            self.input.current_key_down = 0;
+                            self.input
+                                .current_keys_down
+                                .retain(|code| *code != input.scancode);
                             self.input.key_up_buffer = input.scancode;
                         }
                     }
+                    // Handle mouse button input
+                    WindowEvent::MouseInput {
+                        device_id: _,
+                        state,
+                        button,
+                        modifiers: _,
+                    } => {
+                        if state == ElementState::Pressed {
+                            match button {
+                                MouseButton::Left => {
+                                    self.input
+                                        .current_mouse_buttons_down
+                                        .push(input::MouseButton::Left as u32);
+                                    self.input.mouse_button_down_buffer =
+                                        input::MouseButton::Left as u32;
+                                }
+                                MouseButton::Right => {
+                                    self.input
+                                        .current_mouse_buttons_down
+                                        .push(input::MouseButton::Right as u32);
+                                    self.input.mouse_button_down_buffer =
+                                        input::MouseButton::Right as u32;
+                                }
+                                MouseButton::Middle => {
+                                    self.input
+                                        .current_mouse_buttons_down
+                                        .push(input::MouseButton::Middle as u32);
+                                    self.input.mouse_button_down_buffer =
+                                        input::MouseButton::Middle as u32;
+                                }
+                                _ => {}
+                            }
+                        } else {
+                            match button {
+                                MouseButton::Left => {
+                                    self.input.current_mouse_buttons_down.retain(|button| {
+                                        *button != input::MouseButton::Left as u32
+                                    });
+                                    self.input.mouse_button_up_buffer =
+                                        input::MouseButton::Left as u32;
+                                }
+                                MouseButton::Right => {
+                                    self.input.current_mouse_buttons_down.retain(|button| {
+                                        *button != input::MouseButton::Right as u32
+                                    });
+                                    self.input.mouse_button_up_buffer =
+                                        input::MouseButton::Right as u32;
+                                }
+                                MouseButton::Middle => {
+                                    self.input.current_mouse_buttons_down.retain(|button| {
+                                        *button != input::MouseButton::Middle as u32
+                                    });
+                                    self.input.mouse_button_up_buffer =
+                                        input::MouseButton::Middle as u32;
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    WindowEvent::Focused(is_focused) => self.is_focused = is_focused,
                     WindowEvent::CloseRequested => self.quit(),
                     _ => (),
                 },

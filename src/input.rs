@@ -1,8 +1,11 @@
 // Input manager
 pub struct Input {
-    pub current_key_down: u32,
+    pub current_keys_down: Vec<u32>,
     pub key_down_buffer: u32,
     pub key_up_buffer: u32,
+    pub current_mouse_buttons_down: Vec<u32>,
+    pub mouse_button_down_buffer: u32,
+    pub mouse_button_up_buffer: u32,
 }
 
 // Keyboard keys to check for input
@@ -87,23 +90,33 @@ pub enum Key {
     Meta = 57435,
 }
 
+// Different mouse buttons
+pub enum MouseButton {
+    Left = 1,
+    Right = 2,
+    Middle = 3,
+}
+
 impl Input {
     // Default constructor to initialize Input
     pub fn new() -> Self {
         Self {
-            current_key_down: 0,
+            current_keys_down: Vec::new(),
             key_down_buffer: 0,
             key_up_buffer: 0,
+            current_mouse_buttons_down: Vec::new(),
+            mouse_button_down_buffer: 0,
+            mouse_button_up_buffer: 0,
         }
     }
 
     // Return whether a key is being held down
     pub fn is_key_down(&mut self, key: Key) -> bool {
-        return self.current_key_down == (key as u32);
+        return self.current_keys_down.contains(&(key as u32));
     }
-    // Return whether a key is not being held down
+    // Return whether a key is NOT being held down
     pub fn is_key_up(&mut self, key: Key) -> bool {
-        return self.current_key_down != (key as u32);
+        return !self.current_keys_down.contains(&(key as u32));
     }
 
     // Return true for the first frame a key is pressed
@@ -118,6 +131,36 @@ impl Input {
     pub fn on_key_up(&mut self, key: Key) -> bool {
         if self.key_up_buffer == key as u32 {
             self.key_up_buffer = 0;
+            return true;
+        }
+        return false;
+    }
+
+    // Return whether a mouse button is being held down
+    pub fn is_mouse_button_down(&mut self, mouse_button: MouseButton) -> bool {
+        return self
+            .current_mouse_buttons_down
+            .contains(&(mouse_button as u32));
+    }
+    // Return whether a mouse button is NOT being held down
+    pub fn is_mouse_button_up(&mut self, mouse_button: MouseButton) -> bool {
+        return !self
+            .current_mouse_buttons_down
+            .contains(&(mouse_button as u32));
+    }
+
+    // Return true for the first frame a mouse button is pressed
+    pub fn on_mouse_button_down(&mut self, mouse_button: MouseButton) -> bool {
+        if self.mouse_button_down_buffer == mouse_button as u32 {
+            self.mouse_button_down_buffer = 0;
+            return true;
+        }
+        return false;
+    }
+    // Return true for the first frame a mouse button is released
+    pub fn on_mouse_button_up(&mut self, mouse_button: MouseButton) -> bool {
+        if self.mouse_button_up_buffer == mouse_button as u32 {
+            self.mouse_button_up_buffer = 0;
             return true;
         }
         return false;

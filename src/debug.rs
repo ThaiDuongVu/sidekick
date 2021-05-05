@@ -8,6 +8,7 @@ use std::io::stdout;
 pub struct Debug {}
 
 impl Debug {
+    // Log a message of type T to the screen of a specific color
     fn log_colored<T>(&self, message: T, color: Color)
     where
         T: Display,
