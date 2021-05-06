@@ -1,3 +1,5 @@
+use crate::types::vector2::Vector2;
+
 // Input manager
 pub struct Input {
     pub current_keys_down: Vec<u32>,
@@ -6,6 +8,7 @@ pub struct Input {
     pub current_mouse_buttons_down: Vec<u32>,
     pub mouse_button_down_buffer: u32,
     pub mouse_button_up_buffer: u32,
+    pub mouse_position: Vector2,
 }
 
 // Keyboard keys to check for input
@@ -100,14 +103,15 @@ pub enum MouseButton {
 impl Input {
     // Default constructor to initialize Input
     pub fn new() -> Self {
-        Self {
+        return Self {
             current_keys_down: Vec::new(),
             key_down_buffer: 0,
             key_up_buffer: 0,
             current_mouse_buttons_down: Vec::new(),
             mouse_button_down_buffer: 0,
             mouse_button_up_buffer: 0,
-        }
+            mouse_position: Vector2::new(),
+        };
     }
 
     // Return whether a key is being held down
@@ -164,5 +168,10 @@ impl Input {
             return true;
         }
         return false;
+    }
+
+    // Return position of mouse cursor
+    pub fn mouse_position(&mut self) -> Vector2 {
+        return self.mouse_position;
     }
 }

@@ -1,6 +1,6 @@
 # sidekick
 
-[Insert logo here]
+<img src="images/logo.png" width=150/>
 
 2D Vulkan game framework, written entirely in Rust.
 
@@ -89,7 +89,9 @@ To create a basic sidekick app:
         }
 ```
 
-4. You should see the following window by default: 
+4. Build and run the project with `cargo run`.
+
+5. You should see the following window by default: 
 <img src="./images/window.png" width=600/>
 
 ---

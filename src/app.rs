@@ -1,6 +1,7 @@
 use crate::debug::Debug;
 use crate::input;
 use crate::input::Input;
+use crate::types::vector2::Vector2;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{ElementState, Event, MouseButton, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
@@ -49,7 +50,7 @@ pub struct App {
 impl App {
     // Default constructor to initialize App
     pub fn new() -> Self {
-        Self {
+        return Self {
             width: DEFAULT_WIDTH,
             height: DEFAULT_HEIGHT,
             title: String::from(DEFAULT_TITLE),
@@ -66,7 +67,7 @@ impl App {
             control_flow: None,
             input: Input::new(),
             debug: Debug {},
-        }
+        };
     }
 
     // Set App screen width
@@ -393,6 +394,16 @@ impl App {
                                 }
                                 _ => {}
                             }
+                        }
+                    }
+                    WindowEvent::CursorMoved {
+                        device_id: _,
+                        position,
+                        modifiers: _,
+                    } => {
+                        self.input.mouse_position = Vector2 {
+                            x: position.x as f32,
+                            y: position.y as f32,
                         }
                     }
                     WindowEvent::Focused(is_focused) => self.is_focused = is_focused,
