@@ -38,7 +38,6 @@
 - Debugging Tools.
 
 #### Planned features
-- Custom Math Library.
 - Gamepad Input Handling.
 - Test Framework.
 - Basic Shapes Rendering (Line, Triangle, Square).
