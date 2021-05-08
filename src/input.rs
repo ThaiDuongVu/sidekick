@@ -1,16 +1,18 @@
 use crate::types::vector2::Vector2;
+use glutin::dpi::PhysicalPosition;
+use glutin::event::{ElementState, KeyboardInput};
 
 // Input manager
 pub struct Input {
-    pub current_keys_down: Vec<u32>,
-    pub key_down_buffer: u32,
-    pub key_up_buffer: u32,
-    pub current_mouse_buttons_down: Vec<u32>,
-    pub mouse_button_down_buffer: u32,
-    pub mouse_button_up_buffer: u32,
-    pub mouse_position: Vector2,
-    pub is_mouse_entered: bool,
-    pub mouse_entered_buffer: bool,
+    current_keys_down: Vec<u32>,
+    key_down_buffer: u32,
+    key_up_buffer: u32,
+    current_mouse_buttons_down: Vec<u32>,
+    mouse_button_down_buffer: u32,
+    mouse_button_up_buffer: u32,
+    mouse_position: Vector2,
+    is_mouse_entered: bool,
+    mouse_entered_buffer: bool,
 }
 
 // Keyboard keys to check for input
@@ -186,5 +188,83 @@ impl Input {
     // Return whether mouse cursor is NOT in game window
     pub fn is_mouse_exitted(&mut self) -> bool {
         return !self.is_mouse_entered;
+    }
+
+    // Update keyboard input
+    // Only meant to be called internally within sidekick
+    pub fn update_keyboard_input(&mut self, input: KeyboardInput) {
+        if input.state == ElementState::Pressed {
+            if !self.current_keys_down.contains(&input.scancode) {
+                self.current_keys_down.push(input.scancode);
+            }
+            self.key_down_buffer = input.scancode;
+        } else {
+            self.current_keys_down
+                .retain(|code| *code != input.scancode);
+            self.key_up_buffer = input.scancode;
+        };
+    }
+
+    // Update mouse button input
+    // Only meant to be called internally within sidekick
+    pub fn update_mouse_button_input(
+        &mut self,
+        state: ElementState,
+        button: glutin::event::MouseButton,
+    ) {
+        if state == ElementState::Pressed {
+            match button {
+                glutin::event::MouseButton::Left => {
+                    self.current_mouse_buttons_down
+                        .push(MouseButton::Left as u32);
+                    self.mouse_button_down_buffer = MouseButton::Left as u32;
+                }
+                glutin::event::MouseButton::Right => {
+                    self.current_mouse_buttons_down
+                        .push(MouseButton::Right as u32);
+                    self.mouse_button_down_buffer = MouseButton::Right as u32;
+                }
+                glutin::event::MouseButton::Middle => {
+                    self.current_mouse_buttons_down
+                        .push(MouseButton::Middle as u32);
+                    self.mouse_button_down_buffer = MouseButton::Middle as u32;
+                }
+                _ => {}
+            }
+        } else {
+            match button {
+                glutin::event::MouseButton::Left => {
+                    self.current_mouse_buttons_down
+                        .retain(|button| *button != MouseButton::Left as u32);
+                    self.mouse_button_up_buffer = MouseButton::Left as u32;
+                }
+                glutin::event::MouseButton::Right => {
+                    self.current_mouse_buttons_down
+                        .retain(|button| *button != MouseButton::Right as u32);
+                    self.mouse_button_up_buffer = MouseButton::Right as u32;
+                }
+                glutin::event::MouseButton::Middle => {
+                    self.current_mouse_buttons_down
+                        .retain(|button| *button != MouseButton::Middle as u32);
+                    self.mouse_button_up_buffer = MouseButton::Middle as u32;
+                }
+                _ => {}
+            }
+        };
+    }
+
+    // Update mouse position input
+    // Only meant to be called internally within sidekick
+    pub fn update_mouse_position_input(&mut self, position: PhysicalPosition<f64>) {
+        self.mouse_position = Vector2 {
+            x: position.x as f32,
+            y: position.y as f32,
+        };
+    }
+
+    // Update mouse entered/exit input
+    // Only meant to be called internally within sidekick
+    pub fn update_mouse_entered_input(&mut self, is_mouse_entered: bool) {
+        self.is_mouse_entered = is_mouse_entered;
     }
 }

@@ -1,8 +1,6 @@
-use crate::input;
 use crate::input::Input;
-use crate::types::vector2::Vector2;
 use glutin::dpi::PhysicalSize;
-use glutin::event::{ElementState, Event, MouseButton, WindowEvent};
+use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{UserAttentionType, WindowBuilder};
 use glutin::ContextBuilder;
@@ -322,19 +320,7 @@ impl App {
                         device_id: _,
                         input,
                         is_synthetic: _,
-                    } => {
-                        if input.state == ElementState::Pressed {
-                            if !self.input.current_keys_down.contains(&input.scancode) {
-                                self.input.current_keys_down.push(input.scancode);
-                            }
-                            self.input.key_down_buffer = input.scancode;
-                        } else {
-                            self.input
-                                .current_keys_down
-                                .retain(|code| *code != input.scancode);
-                            self.input.key_up_buffer = input.scancode;
-                        }
-                    }
+                    } => self.input.update_keyboard_input(input),
 
                     // Handle mouse button input
                     WindowEvent::MouseInput {
@@ -342,74 +328,21 @@ impl App {
                         state,
                         button,
                         modifiers: _,
-                    } => {
-                        if state == ElementState::Pressed {
-                            match button {
-                                MouseButton::Left => {
-                                    self.input
-                                        .current_mouse_buttons_down
-                                        .push(input::MouseButton::Left as u32);
-                                    self.input.mouse_button_down_buffer =
-                                        input::MouseButton::Left as u32;
-                                }
-                                MouseButton::Right => {
-                                    self.input
-                                        .current_mouse_buttons_down
-                                        .push(input::MouseButton::Right as u32);
-                                    self.input.mouse_button_down_buffer =
-                                        input::MouseButton::Right as u32;
-                                }
-                                MouseButton::Middle => {
-                                    self.input
-                                        .current_mouse_buttons_down
-                                        .push(input::MouseButton::Middle as u32);
-                                    self.input.mouse_button_down_buffer =
-                                        input::MouseButton::Middle as u32;
-                                }
-                                _ => {}
-                            }
-                        } else {
-                            match button {
-                                MouseButton::Left => {
-                                    self.input.current_mouse_buttons_down.retain(|button| {
-                                        *button != input::MouseButton::Left as u32
-                                    });
-                                    self.input.mouse_button_up_buffer =
-                                        input::MouseButton::Left as u32;
-                                }
-                                MouseButton::Right => {
-                                    self.input.current_mouse_buttons_down.retain(|button| {
-                                        *button != input::MouseButton::Right as u32
-                                    });
-                                    self.input.mouse_button_up_buffer =
-                                        input::MouseButton::Right as u32;
-                                }
-                                MouseButton::Middle => {
-                                    self.input.current_mouse_buttons_down.retain(|button| {
-                                        *button != input::MouseButton::Middle as u32
-                                    });
-                                    self.input.mouse_button_up_buffer =
-                                        input::MouseButton::Middle as u32;
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
+                    } => self.input.update_mouse_button_input(state, button),
+
                     // Handle cursor position input
                     WindowEvent::CursorMoved {
                         device_id: _,
                         position,
                         modifiers: _,
-                    } => {
-                        self.input.mouse_position = Vector2 {
-                            x: position.x as f32,
-                            y: position.y as f32,
-                        }
-                    }
+                    } => self.input.update_mouse_position_input(position),
+
                     WindowEvent::CursorEntered { device_id: _ } => {
-                        self.input.is_mouse_entered = true
+                        self.input.update_mouse_entered_input(true)
                     }
-                    WindowEvent::CursorLeft { device_id: _ } => self.input.is_mouse_entered = false,
+                    WindowEvent::CursorLeft { device_id: _ } => {
+                        self.input.update_mouse_entered_input(false)
+                    }
 
                     WindowEvent::Focused(is_focused) => self.is_focused = is_focused,
                     WindowEvent::CloseRequested => self.quit(),
