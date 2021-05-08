@@ -47,6 +47,7 @@ pub struct App {
     pub debug: Debug,
 }
 
+#[allow(deprecated)]
 impl App {
     // Default constructor to initialize App
     pub fn new() -> Self {
@@ -337,6 +338,7 @@ impl App {
                             self.input.key_up_buffer = input.scancode;
                         }
                     }
+
                     // Handle mouse button input
                     WindowEvent::MouseInput {
                         device_id: _,
@@ -396,6 +398,7 @@ impl App {
                             }
                         }
                     }
+                    // Handle cursor position input
                     WindowEvent::CursorMoved {
                         device_id: _,
                         position,
@@ -406,6 +409,11 @@ impl App {
                             y: position.y as f32,
                         }
                     }
+                    WindowEvent::CursorEntered { device_id: _ } => {
+                        self.input.is_mouse_entered = true
+                    }
+                    WindowEvent::CursorLeft { device_id: _ } => self.input.is_mouse_entered = false,
+
                     WindowEvent::Focused(is_focused) => self.is_focused = is_focused,
                     WindowEvent::CloseRequested => self.quit(),
                     _ => (),

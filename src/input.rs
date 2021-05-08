@@ -9,6 +9,8 @@ pub struct Input {
     pub mouse_button_down_buffer: u32,
     pub mouse_button_up_buffer: u32,
     pub mouse_position: Vector2,
+    pub is_mouse_entered: bool,
+    pub mouse_entered_buffer: bool,
 }
 
 // Keyboard keys to check for input
@@ -111,6 +113,8 @@ impl Input {
             mouse_button_down_buffer: 0,
             mouse_button_up_buffer: 0,
             mouse_position: Vector2::new(),
+            is_mouse_entered: false,
+            mouse_entered_buffer: false,
         };
     }
 
@@ -173,5 +177,14 @@ impl Input {
     // Return position of mouse cursor
     pub fn mouse_position(&mut self) -> Vector2 {
         return self.mouse_position;
+    }
+
+    // Return whether mouse cursor is in game window
+    pub fn is_mouse_entered(&mut self) -> bool {
+        return self.is_mouse_entered;
+    }
+    // Return whether mouse cursor is NOT in game window
+    pub fn is_mouse_exitted(&mut self) -> bool {
+        return !self.is_mouse_entered;
     }
 }

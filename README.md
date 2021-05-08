@@ -22,7 +22,7 @@
 
 **sidekick** supports Windows, Linux and macOS (although untested properly on macOS).
 
-**sidekick** is subject to change as it is actively developed so expect things to break every now and then (sorry about that 😅).
+**sidekick** is subject to change as it is actively developed so expect things to break (sorry about that 😅).
 
 **sidekick** is an education project for learning purposes, feel free to use it in personal and commercial projects, just keep in mind that support is minimal.
 
