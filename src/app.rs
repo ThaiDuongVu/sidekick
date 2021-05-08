@@ -1,4 +1,3 @@
-use crate::debug::Debug;
 use crate::input;
 use crate::input::Input;
 use crate::types::vector2::Vector2;
@@ -44,7 +43,6 @@ pub struct App {
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
-    pub debug: Debug,
 }
 
 #[allow(deprecated)]
@@ -67,7 +65,6 @@ impl App {
             current_context: None,
             control_flow: None,
             input: Input::new(),
-            debug: Debug {},
         };
     }
 

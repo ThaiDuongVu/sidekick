@@ -123,22 +123,22 @@ impl Vector2 {
         return Self { x: 0.0, y: 1.0 };
     }
 
-    // Length of current vector
+    // Return length of current vector
     pub fn length(&mut self) -> f32 {
         return (self.x.powi(2) + self.y.powi(2)).sqrt();
     }
-    // Vector normalized so that its length is 1
+    // Normalize vector so that its length is 1
     pub fn normalized(&mut self) -> Vector2 {
         return Vector2 {
             x: (1.0 / self.length()) * self.x,
             y: (1.0 / self.length()) * self.y,
         };
     }
-    // Distance from current vector to another vector
+    // Return distance from current vector to another vector
     pub fn distance(&mut self, other: Vector2) -> f32 {
         return ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt();
     }
-    // Dot product of current vector and another vector
+    // Return dot product of current vector and another vector
     pub fn dot(&mut self, other: Vector2) -> f32 {
         return self.x * other.x + self.y * other.y;
     }

@@ -143,7 +143,7 @@ impl Color {
             g: 0.0,
             b: 0.0,
             a: 1.0,
-        }
+        };
     }
     pub fn green() -> Self {
         return Self {
@@ -151,7 +151,7 @@ impl Color {
             g: 1.0,
             b: 0.0,
             a: 1.0,
-        }
+        };
     }
     pub fn blue() -> Self {
         return Self {
@@ -159,7 +159,7 @@ impl Color {
             g: 0.0,
             b: 1.0,
             a: 1.0,
-        }
+        };
     }
     pub fn yellow() -> Self {
         return Self {
@@ -167,7 +167,7 @@ impl Color {
             g: 1.0,
             b: 0.0,
             a: 1.0,
-        }
+        };
     }
     pub fn pink() -> Self {
         return Self {
@@ -175,7 +175,7 @@ impl Color {
             g: 0.0,
             b: 1.0,
             a: 1.0,
-        }
+        };
     }
     pub fn teal() -> Self {
         return Self {
@@ -183,7 +183,7 @@ impl Color {
             g: 1.0,
             b: 1.0,
             a: 1.0,
-        }
+        };
     }
     pub fn black() -> Self {
         return Self {
@@ -191,7 +191,7 @@ impl Color {
             g: 0.0,
             b: 0.0,
             a: 1.0,
-        }
+        };
     }
     pub fn white() -> Self {
         return Self {
@@ -199,16 +199,40 @@ impl Color {
             g: 1.0,
             b: 1.0,
             a: 1.0,
-        }
+        };
     }
 
     // Color normalized so that its RGB values are between 0 and 1
     pub fn normalized(&mut self) -> Color {
         return Color {
-            r: if self.r > 1.0 { 1.0 } else if self.r < 0.0 { 0.0 } else { self.r },
-            g: if self.g > 1.0 { 1.0 } else if self.g < 0.0 { 0.0 } else { self.g },
-            b: if self.b > 1.0 { 1.0 } else if self.b < 0.0 { 0.0 } else { self.b },
-            a: if self.a > 1.0 { 1.0 } else if self.a < 0.0 { 0.0 } else { self.a }
+            r: if self.r > 1.0 {
+                1.0
+            } else if self.r < 0.0 {
+                0.0
+            } else {
+                self.r
+            },
+            g: if self.g > 1.0 {
+                1.0
+            } else if self.g < 0.0 {
+                0.0
+            } else {
+                self.g
+            },
+            b: if self.b > 1.0 {
+                1.0
+            } else if self.b < 0.0 {
+                0.0
+            } else {
+                self.b
+            },
+            a: if self.a > 1.0 {
+                1.0
+            } else if self.a < 0.0 {
+                0.0
+            } else {
+                self.a
+            },
         };
     }
 }

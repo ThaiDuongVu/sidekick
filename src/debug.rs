@@ -5,43 +5,43 @@ use crossterm::{
 use std::fmt::Display;
 use std::io::stdout;
 
+// Log a message of type T to the screen of a specific color
+fn log_colored<T>(message: T, color: Color)
+where
+    T: Display,
+{
+    match stdout().execute(SetBackgroundColor(Color::Black)) {
+        Ok(_) => {}
+        Err(err) => println!("{}", err),
+    };
+    match stdout().execute(SetForegroundColor(color)) {
+        Ok(_) => {}
+        Err(err) => println!("{}", err),
+    };
+    match stdout().execute(Print(message)) {
+        Ok(_) => {}
+        Err(err) => println!("{}", err),
+    };
+    match stdout().execute(Print("\n")) {
+        Ok(_) => {}
+        Err(err) => println!("{}", err),
+    };
+    match stdout().execute(ResetColor) {
+        Ok(_) => {}
+        Err(err) => println!("{}", err),
+    };
+}
+
 pub struct Debug {}
 
 impl Debug {
-    // Log a message of type T to the screen of a specific color
-    fn log_colored<T>(&self, message: T, color: Color)
-    where
-        T: Display,
-    {
-        match stdout().execute(SetBackgroundColor(Color::Black)) {
-            Ok(_) => {}
-            Err(err) => println!("{}", err),
-        };
-        match stdout().execute(SetForegroundColor(color)) {
-            Ok(_) => {}
-            Err(err) => println!("{}", err),
-        };
-        match stdout().execute(Print(message)) {
-            Ok(_) => {}
-            Err(err) => println!("{}", err),
-        };
-        match stdout().execute(Print("\n")) {
-            Ok(_) => {}
-            Err(err) => println!("{}", err),
-        };
-        match stdout().execute(ResetColor) {
-            Ok(_) => {}
-            Err(err) => println!("{}", err),
-        };
-    }
-
     // Log a message of type T to the screen
     // Note that type T must implement Display trait to print
-    pub fn log<T>(&self, message: T)
+    pub fn log<T>(message: T)
     where
         T: Display,
     {
-        self.log_colored(message, Color::White);
+        log_colored(message, Color::White);
     }
 
     // Log a warning message of type T to the screen
@@ -50,7 +50,7 @@ impl Debug {
     where
         T: std::fmt::Display,
     {
-        self.log_colored(message, Color::Yellow);
+        log_colored(message, Color::Yellow);
     }
 
     // Log a error message of type T to the screen
@@ -59,7 +59,7 @@ impl Debug {
     where
         T: std::fmt::Display,
     {
-        self.log_colored(message, Color::Red);
+        log_colored(message, Color::Red);
     }
 
     // Log a error message of type T to the screen
@@ -68,6 +68,6 @@ impl Debug {
     where
         T: std::fmt::Display,
     {
-        self.log_colored(message, Color::Green);
+        log_colored(message, Color::Green);
     }
 }
