@@ -12,7 +12,6 @@ pub struct Input {
     mouse_button_up_buffer: u32,
     mouse_position: Vector2,
     is_mouse_entered: bool,
-    mouse_entered_buffer: bool,
 }
 
 // Keyboard keys to check for input
@@ -116,7 +115,6 @@ impl Input {
             mouse_button_up_buffer: 0,
             mouse_position: Vector2::new(),
             is_mouse_entered: false,
-            mouse_entered_buffer: false,
         };
     }
 

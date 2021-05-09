@@ -1,4 +1,5 @@
 use crate::input::Input;
+use crate::time::Time;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
@@ -41,6 +42,7 @@ pub struct App {
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
+    pub time: Time,
 }
 
 #[allow(deprecated)]
@@ -63,6 +65,7 @@ impl App {
             current_context: None,
             control_flow: None,
             input: Input::new(),
+            time: Time::new(),
         };
     }
 
@@ -297,13 +300,14 @@ impl App {
 
         // Main program loop
         event_loop.run(move |event, _, control_flow| {
-            *control_flow = ControlFlow::Wait;
+            *control_flow = ControlFlow::Poll;
             self.control_flow = Some(control_flow);
 
             // User-defined update
             if let Some(update) = update {
                 update(&mut self);
             }
+
             // Poll for events in main loop
             match event {
                 Event::LoopDestroyed => {
@@ -330,13 +334,13 @@ impl App {
                         modifiers: _,
                     } => self.input.update_mouse_button_input(state, button),
 
-                    // Handle cursor position input
+                    // Handle mouse position input
                     WindowEvent::CursorMoved {
                         device_id: _,
                         position,
                         modifiers: _,
                     } => self.input.update_mouse_position_input(position),
-
+                    // Handle mouse enter/exit input
                     WindowEvent::CursorEntered { device_id: _ } => {
                         self.input.update_mouse_entered_input(true)
                     }
@@ -348,6 +352,10 @@ impl App {
                     WindowEvent::CloseRequested => self.quit(),
                     _ => (),
                 },
+                Event::RedrawEventsCleared => {
+                    // Update frame time before next iteration
+                    self.time.update();
+                }
                 Event::RedrawRequested(_) => {
                     // User-defined render
                     if let Some(render) = render {
