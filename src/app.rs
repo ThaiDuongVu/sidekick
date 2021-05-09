@@ -353,7 +353,7 @@ impl App {
                     _ => (),
                 },
                 Event::RedrawEventsCleared => {
-                    // Update frame time before next iteration
+                    // Update frame time before next update iteration
                     self.time.update();
                 }
                 Event::RedrawRequested(_) => {

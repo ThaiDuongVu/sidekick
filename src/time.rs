@@ -35,7 +35,7 @@ impl Time {
     }
 
     // Update frame time
-    // Is called every frame
+    // Is called every update iteration
     pub fn update(&mut self) {
         // Get current time
         self.current_time = self.start.elapsed().as_secs_f32();

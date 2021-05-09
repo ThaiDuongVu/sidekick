@@ -57,6 +57,22 @@ impl ops::Div<Vector2> for Vector2 {
         };
     }
 }
+impl ops::AddAssign for Vector2 {
+    fn add_assign(&mut self, rhs: Vector2) {
+        *self = Vector2 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+impl ops::SubAssign for Vector2 {
+    fn sub_assign(&mut self, rhs: Vector2) {
+        *self = Vector2 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
 
 // Mathematical operator overloadings for Vector type on f32 type
 impl ops::Add<f32> for Vector2 {
@@ -93,6 +109,22 @@ impl ops::Div<f32> for Vector2 {
             x: self.x / rhs,
             y: self.y / rhs,
         };
+    }
+}
+impl ops::AddAssign<f32> for Vector2 {
+    fn add_assign(&mut self, rhs: f32) {
+        *self = Vector2 {
+            x: self.x + rhs,
+            y: self.y + rhs,
+        }
+    }
+}
+impl ops::SubAssign<f32> for Vector2 {
+    fn sub_assign(&mut self, rhs: f32) {
+        *self = Vector2 {
+            x: self.x - rhs,
+            y: self.y - rhs,
+        }
     }
 }
 
