@@ -71,6 +71,46 @@ impl ops::Div<Color> for Color {
         };
     }
 }
+impl ops::AddAssign for Color {
+    fn add_assign(&mut self, rhs: Color) {
+        *self = Color {
+            r: self.r + rhs.r,
+            g: self.g + rhs.g,
+            b: self.b + rhs.b,
+            a: self.a + rhs.a,
+        }
+    }
+}
+impl ops::SubAssign for Color {
+    fn sub_assign(&mut self, rhs: Color) {
+        *self = Color {
+            r: self.r - rhs.r,
+            g: self.g - rhs.g,
+            b: self.b - rhs.b,
+            a: self.a - rhs.a,
+        }
+    }
+}
+impl ops::MulAssign for Color {
+    fn mul_assign(&mut self, rhs: Color) {
+        *self = Color {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+            a: self.a * rhs.a,
+        }
+    }
+}
+impl ops::DivAssign for Color {
+    fn div_assign(&mut self, rhs: Color) {
+        *self = Color {
+            r: self.r / rhs.r,
+            g: self.g / rhs.g,
+            b: self.b / rhs.b,
+            a: self.a / rhs.a,
+        }
+    }
+}
 
 // Mathematical operator overloadings for Color type on f32 type
 impl ops::Add<f32> for Color {

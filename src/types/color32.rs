@@ -117,6 +117,46 @@ impl ops::Div<u32> for Color32 {
         };
     }
 }
+impl ops::AddAssign for Color32 {
+    fn add_assign(&mut self, rhs: Color32) {
+        *self = Color32 {
+            r: self.r + rhs.r,
+            g: self.g + rhs.g,
+            b: self.b + rhs.b,
+            a: self.a + rhs.a,
+        }
+    }
+}
+impl ops::SubAssign for Color32 {
+    fn sub_assign(&mut self, rhs: Color32) {
+        *self = Color32 {
+            r: self.r - rhs.r,
+            g: self.g - rhs.g,
+            b: self.b - rhs.b,
+            a: self.a - rhs.a,
+        }
+    }
+}
+impl ops::MulAssign for Color32 {
+    fn mul_assign(&mut self, rhs: Color32) {
+        *self = Color32 {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+            a: self.a * rhs.a,
+        }
+    }
+}
+impl ops::DivAssign for Color32 {
+    fn div_assign(&mut self, rhs: Color32) {
+        *self = Color32 {
+            r: self.r / rhs.r,
+            g: self.g / rhs.g,
+            b: self.b / rhs.b,
+            a: self.a / rhs.a,
+        }
+    }
+}
 
 // Logical operator overloadings for type Color32
 impl PartialEq for Color32 {
