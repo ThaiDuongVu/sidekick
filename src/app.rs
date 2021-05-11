@@ -266,13 +266,18 @@ impl App {
     }
 
     // Run App
-    pub fn run(
+    pub fn run<I, U, R, E>(
         mut self,
-        init: Option<fn(&mut App)>,
-        update: Option<fn(&mut App)>,
-        render: Option<fn(&mut App)>,
-        exit: Option<fn(&mut App)>,
-    ) {
+        init: Option<I>,
+        update: Option<U>,
+        render: Option<R>,
+        exit: Option<E>,
+    ) where
+        I: Fn(&mut App) + 'static,
+        U: Fn(&mut App) + 'static,
+        R: Fn(&mut App) + 'static,
+        E: Fn(&mut App) + 'static,
+    {
         // Create event loop for window context
         let event_loop = EventLoop::new();
         // Create a new window context and attach to App
@@ -304,7 +309,7 @@ impl App {
             self.control_flow = Some(control_flow);
 
             // User-defined update
-            if let Some(update) = update {
+            if let Some(update) = &update {
                 update(&mut self);
             }
 
@@ -312,7 +317,7 @@ impl App {
             match event {
                 Event::LoopDestroyed => {
                     // User-defined exit
-                    if let Some(exit) = exit {
+                    if let Some(exit) = &exit {
                         exit(&mut self);
                     }
                     return;
@@ -358,7 +363,7 @@ impl App {
                 }
                 Event::RedrawRequested(_) => {
                     // User-defined render
-                    if let Some(render) = render {
+                    if let Some(render) = &render {
                         render(&mut self);
                     }
                     self.current_context
