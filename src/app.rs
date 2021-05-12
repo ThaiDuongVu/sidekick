@@ -3,13 +3,52 @@ use crate::time::Time;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
-use glutin::window::{UserAttentionType, WindowBuilder};
+use glutin::window::{CursorIcon, UserAttentionType, WindowBuilder};
 use glutin::ContextBuilder;
 
 // Types of attention to request user
 pub enum AttentionType {
     Critical,
     Informational,
+}
+
+// Style of mouse cursor
+pub enum MouseIcon {
+    Default,
+    Crosshair,
+    Hand,
+    Arrow,
+    Move,
+    Text,
+    Wait,
+    Help,
+    Progress,
+    NotAllowed,
+    ContextMenu,
+    Cell,
+    VerticalText,
+    Alias,
+    Copy,
+    NoDrop,
+    Grab,
+    Grabbing,
+    AllScroll,
+    ZoomIn,
+    ZoomOut,
+    EastResize,
+    NorthResize,
+    NorthEastResize,
+    NorthWestResize,
+    SouthResize,
+    SouthEastResize,
+    SouthWestResize,
+    WestResize,
+    EastWestResize,
+    NorthSouthResize,
+    NorthEastSouthWestResize,
+    NorthWestSouthEastResize,
+    ColumnResize,
+    RowResize,
 }
 
 // Default values for window initialization
@@ -24,6 +63,7 @@ const DEFAULT_DECORATION: bool = true;
 const DEFAULT_ALWAYS_ON_TOP: bool = false;
 const DEFAULT_CURSOR_CONFINEMENT: bool = false;
 const DEFAULT_CURSOR_VISIBILITY: bool = true;
+const DEFAULT_FOCUS: bool = true;
 
 // Main game App, everything is wrapped in here
 pub struct App {
@@ -36,8 +76,9 @@ pub struct App {
     is_maximized: bool,
     is_decorated: bool,
     is_always_on_top: bool,
-    is_cursor_confined: bool,
-    is_cursor_visible: bool,
+    is_mouse_confined: bool,
+    is_mouse_visible: bool,
+    mouse_icon: MouseIcon,
     is_focused: bool,
     current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
     control_flow: Option<*mut ControlFlow>,
@@ -59,9 +100,10 @@ impl App {
             is_maximized: DEFAULT_MAXIMIZATION,
             is_decorated: DEFAULT_DECORATION,
             is_always_on_top: DEFAULT_ALWAYS_ON_TOP,
-            is_cursor_confined: DEFAULT_CURSOR_CONFINEMENT,
-            is_cursor_visible: DEFAULT_CURSOR_VISIBILITY,
-            is_focused: true,
+            is_mouse_confined: DEFAULT_CURSOR_CONFINEMENT,
+            is_mouse_visible: DEFAULT_CURSOR_VISIBILITY,
+            mouse_icon: MouseIcon::Default,
+            is_focused: DEFAULT_FOCUS,
             current_context: None,
             control_flow: None,
             input: Input::new(),
@@ -207,38 +249,90 @@ impl App {
     }
 
     // Set whether mouse cursor is confined within window bound
-    pub fn set_cursor_confined(&mut self, is_cursor_confined: bool) {
-        self.is_cursor_confined = is_cursor_confined;
+    pub fn set_mouse_confined(&mut self, is_mouse_confined: bool) {
+        self.is_mouse_confined = is_mouse_confined;
         match self
             .current_context
             .as_ref()
             .unwrap()
             .window()
-            .set_cursor_grab(self.is_cursor_confined)
+            .set_cursor_grab(self.is_mouse_confined)
         {
             Ok(_) => {}
             Err(err) => {
-                println!("Error when setting cursor confinement: {}", err)
+                println!("Error when setting mouse cursor confinement: {}", err)
             }
         }
     }
     // Return whether mouse cursor is confined within window bound
-    pub fn is_cursor_confined(&self) -> bool {
-        return self.is_cursor_confined;
+    pub fn is_mouse_confined(&self) -> bool {
+        return self.is_mouse_confined;
     }
 
     // Set whether mouse cursor is visible
-    pub fn set_cursor_visible(&mut self, is_cursor_visible: bool) {
-        self.is_cursor_visible = is_cursor_visible;
+    pub fn set_mouse_visible(&mut self, is_mouse_visible: bool) {
+        self.is_mouse_visible = is_mouse_visible;
         self.current_context
             .as_ref()
             .unwrap()
             .window()
-            .set_cursor_visible(self.is_cursor_visible);
+            .set_cursor_visible(self.is_mouse_visible);
     }
     // Return whether mouse cursor is visible
-    pub fn is_cursor_visible(&self) -> bool {
-        return self.is_cursor_visible;
+    pub fn is_mouse_visible(&self) -> bool {
+        return self.is_mouse_visible;
+    }
+
+    // Set mouse icon
+    pub fn set_mouse_icon(&mut self, mouse_icon: MouseIcon) {
+        let icon: CursorIcon = match mouse_icon {
+            MouseIcon::Default => CursorIcon::Default,
+            MouseIcon::Crosshair => CursorIcon::Crosshair,
+            MouseIcon::Hand => CursorIcon::Hand,
+            MouseIcon::Arrow => CursorIcon::Arrow,
+            MouseIcon::Move => CursorIcon::Move,
+            MouseIcon::Text => CursorIcon::Text,
+            MouseIcon::Wait => CursorIcon::Wait,
+            MouseIcon::Help => CursorIcon::Help,
+            MouseIcon::Progress => CursorIcon::Progress,
+            MouseIcon::NotAllowed => CursorIcon::NotAllowed,
+            MouseIcon::ContextMenu => CursorIcon::ContextMenu,
+            MouseIcon::Cell => CursorIcon::Cell,
+            MouseIcon::VerticalText => CursorIcon::VerticalText,
+            MouseIcon::Alias => CursorIcon::Alias,
+            MouseIcon::Copy => CursorIcon::Copy,
+            MouseIcon::NoDrop => CursorIcon::NoDrop,
+            MouseIcon::Grab => CursorIcon::Grab,
+            MouseIcon::Grabbing => CursorIcon::Grabbing,
+            MouseIcon::AllScroll => CursorIcon::AllScroll,
+            MouseIcon::ZoomIn => CursorIcon::ZoomIn,
+            MouseIcon::ZoomOut => CursorIcon::ZoomOut,
+            MouseIcon::EastResize => CursorIcon::EResize,
+            MouseIcon::NorthResize => CursorIcon::NResize,
+            MouseIcon::NorthEastResize => CursorIcon::NeResize,
+            MouseIcon::NorthWestResize => CursorIcon::NwResize,
+            MouseIcon::SouthResize => CursorIcon::SResize,
+            MouseIcon::SouthEastResize => CursorIcon::SeResize,
+            MouseIcon::SouthWestResize => CursorIcon::SwResize,
+            MouseIcon::WestResize => CursorIcon::WResize,
+            MouseIcon::EastWestResize => CursorIcon::EwResize,
+            MouseIcon::NorthSouthResize => CursorIcon::NsResize,
+            MouseIcon::NorthEastSouthWestResize => CursorIcon::NeswResize,
+            MouseIcon::NorthWestSouthEastResize => CursorIcon::NwseResize,
+            MouseIcon::ColumnResize => CursorIcon::ColResize,
+            MouseIcon::RowResize => CursorIcon::RowResize,
+        };
+        self.mouse_icon = mouse_icon;
+
+        self.current_context
+            .as_ref()
+            .unwrap()
+            .window()
+            .set_cursor_icon(icon);
+    }
+    // Return current mouse icon
+    pub fn mouse_icon(self) -> MouseIcon {
+        return self.mouse_icon;
     }
 
     // Return whether App is focused
@@ -323,7 +417,6 @@ impl App {
                     return;
                 }
                 Event::WindowEvent { event, .. } => match event {
-                    // WindowEvent::Resized(physical_size) => new_context.resize(physical_size),
                     // Handle keyboard input
                     WindowEvent::KeyboardInput {
                         device_id: _,

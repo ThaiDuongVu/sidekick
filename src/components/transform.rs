@@ -1,5 +1,5 @@
-use std::fmt;
 use crate::types::vector2::Vector2;
+use std::fmt;
 
 pub struct Transform {
     pub position: Vector2,
@@ -9,7 +9,11 @@ pub struct Transform {
 
 impl fmt::Display for Transform {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "Position: {} \nRotation: {} \nScale: {}", self.position, self.rotation, self.scale)
+        write!(
+            formatter,
+            "Position: {} \nRotation: {} \nScale: {}",
+            self.position, self.rotation, self.scale
+        )
     }
 }
 
