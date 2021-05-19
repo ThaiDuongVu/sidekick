@@ -9,6 +9,7 @@
 ### Table of Contents
 - [About](#about)
 - [Features](#features)
+- [Goals and Non-goals](#goals-and-non-goals)
 - [Contributing](#contributing)
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
@@ -35,6 +36,7 @@
 - Cursor Management
 - Keyboard Input Handling.
 - Mouse Input Handling.
+- Game Time.
 - Debugging Tools.
 
 #### Planned features
@@ -47,6 +49,22 @@
 - 2D Physics.
 - 2D Lighting & Shadow.
 - And more to be added...
+
+---
+
+### Goals and Non-goals
+
+#### Goals (Order from most to least important)
+- Intuitive and Accessible.
+- Fast and Easy to get started.
+- 100% Rust.
+- Performant.
+- Comprehensive Documentation.
+- Cross-platform.
+
+#### Non-goals (some of these might get implemented if requested 🤔)
+- 3D Rendering.
+- UI Editor.
 
 ---
 
