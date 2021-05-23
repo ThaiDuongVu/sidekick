@@ -2,7 +2,7 @@
 
 <img src="images/logo.png" width=150/>
 
-2D Vulkan game framework, written entirely in Rust.
+2D game framework, written entirely in Rust.
 
 ---
 
