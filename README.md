@@ -104,7 +104,12 @@ To create a basic sidekick app:
 
         fn main() {
             let app = App::new();
-            app.run(None, None, None, None);
+            app.run(
+                None::<fn(&mut App)>,
+                None::<fn(&mut App)>,
+                None::<fn(&mut App)>,
+                None::<fn(&mut App)>,
+            );
         }
 ```
 
