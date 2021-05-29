@@ -21,11 +21,11 @@
 
 **sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that will allow developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and Vulkan as the rendering backend (the Vulkan side is not yet implemented).
 
-**sidekick** supports Windows, Linux and macOS (although untested properly on macOS).
+**sidekick** supports Windows, Linux and macOS (although untested properly on macOS, sorry I don't have a mac 😓).
 
-**sidekick** is subject to change as it is actively developed so expect things to break (sorry about that 😅).
+**sidekick** is subject to change as it is actively developed so expect things to break (😅).
 
-**sidekick** is an education project for learning purposes, feel free to use it in personal and commercial projects, just keep in mind that support is minimal.
+**sidekick** is an educational project for learning purposes, feel free to use it in personal and commercial projects, just keep in mind that support is minimal.
 
 ---
 
@@ -36,18 +36,20 @@
 - Cursor Management
 - Keyboard Input Handling.
 - Mouse Input Handling.
-- Game Time.
+- Game Time Management.
 - Debugging Tools.
 
 #### Planned features
+- Custom Math & Logic Library
 - Gamepad Input Handling.
-- Test Framework.
 - Basic Shapes Rendering (Line, Triangle, Square).
 - Text Rendering.
 - Sprite Rendering.
 - Audio Playing.
 - 2D Physics.
 - 2D Lighting & Shadow.
+- Profiling Tools.
+- Custom Test Framework.
 - And more to be added...
 
 ---
