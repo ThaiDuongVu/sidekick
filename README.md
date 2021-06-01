@@ -1,6 +1,6 @@
 # sidekick
 
-<img src="images/logo.png" width=150/>
+<img src="images/logo.png"/>
 
 2D game framework, written entirely in Rust.
 
