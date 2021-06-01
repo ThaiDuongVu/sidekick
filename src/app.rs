@@ -6,6 +6,24 @@ use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{CursorIcon, UserAttentionType, WindowBuilder};
 use glutin::ContextBuilder;
 
+use std::borrow::Cow;
+use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
+use vulkano::command_buffer::{AutoCommandBufferBuilder, DynamicState, SubpassContents};
+use vulkano::device::{Device, DeviceExtensions};
+use vulkano::framebuffer::{Framebuffer, FramebufferAbstract, RenderPassAbstract, Subpass};
+use vulkano::image::{ImageUsage, SwapchainImage};
+use vulkano::instance::{ApplicationInfo, Instance, PhysicalDevice, Version};
+use vulkano::pipeline::viewport::Viewport;
+use vulkano::pipeline::GraphicsPipeline;
+use vulkano::swapchain;
+use vulkano::swapchain::{
+    AcquireError, ColorSpace, FullscreenExclusive, PresentMode, SurfaceTransform, Swapchain,
+    SwapchainCreationError,
+};
+use vulkano::sync;
+use vulkano::sync::{FlushError, GpuFuture};
+use vulkano_win::VkSurfaceBuild;
+
 // Types of attention to request user
 pub enum AttentionType {
     Critical,
@@ -80,7 +98,7 @@ pub struct App {
     is_mouse_visible: bool,
     mouse_icon: MouseIcon,
     is_focused: bool,
-    current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
+    surface: Option<std::sync::Arc<vulkano::swapchain::Surface<glutin::window::Window>>>,
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
     pub time: Time,
@@ -104,7 +122,7 @@ impl App {
             is_mouse_visible: DEFAULT_CURSOR_VISIBILITY,
             mouse_icon: MouseIcon::Default,
             is_focused: DEFAULT_FOCUS,
-            current_context: None,
+            surface: None,
             control_flow: None,
             input: Input::new(),
             time: Time::new(),
@@ -114,7 +132,7 @@ impl App {
     // Set App screen width
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -128,7 +146,7 @@ impl App {
     // Set App screen height
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -143,7 +161,7 @@ impl App {
     pub fn set_size(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -153,7 +171,7 @@ impl App {
     // Set App screen title
     pub fn set_title(&mut self, title: &str) {
         self.title = String::from(title);
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -167,7 +185,7 @@ impl App {
     // Set whether App is resizable
     pub fn set_resizable(&mut self, is_resizable: bool) {
         self.is_resizable = is_resizable;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -181,7 +199,7 @@ impl App {
     // Set whether App is visible
     pub fn set_visible(&mut self, is_visible: bool) {
         self.is_visible = is_visible;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -195,7 +213,7 @@ impl App {
     // Set whether App is minimized
     pub fn set_minimized(&mut self, is_minimized: bool) {
         self.is_minimized = is_minimized;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -209,7 +227,7 @@ impl App {
     // Set whether App is maximized
     pub fn set_maximized(&mut self, is_maximized: bool) {
         self.is_minimized = is_maximized;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -223,7 +241,7 @@ impl App {
     // Set whether App is decorated
     pub fn set_decorated(&mut self, is_decorated: bool) {
         self.is_decorated = is_decorated;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -237,7 +255,7 @@ impl App {
     // Set whether App is always on top
     pub fn set_always_on_top(&mut self, is_always_on_top: bool) {
         self.is_always_on_top = is_always_on_top;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -252,7 +270,7 @@ impl App {
     pub fn set_mouse_confined(&mut self, is_mouse_confined: bool) {
         self.is_mouse_confined = is_mouse_confined;
         match self
-            .current_context
+            .surface
             .as_ref()
             .unwrap()
             .window()
@@ -272,7 +290,7 @@ impl App {
     // Set whether mouse cursor is visible
     pub fn set_mouse_visible(&mut self, is_mouse_visible: bool) {
         self.is_mouse_visible = is_mouse_visible;
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -324,7 +342,7 @@ impl App {
         };
         self.mouse_icon = mouse_icon;
 
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -342,7 +360,7 @@ impl App {
 
     // App request for user attention
     pub fn request_attention(&mut self, attention_type: AttentionType) {
-        self.current_context
+        self.surface
             .as_ref()
             .unwrap()
             .window()
@@ -372,25 +390,35 @@ impl App {
         R: Fn(&mut App) + 'static,
         E: Fn(&mut App) + 'static,
     {
+        // Create a Vulkan instance
+        // Get list of required extensions
+        let required_extensions = vulkano_win::required_extensions();
+        // General application info
+        let app_info = ApplicationInfo {
+            application_name: Some(Cow::Borrowed(self.title())),
+            application_version: Some(Version::from_vulkan_version(100)),
+            engine_name: Some(Cow::Borrowed("Sidekick")),
+            engine_version: Some(Version::from_vulkan_version(010)),
+        };
+        // Create instance
+        let instance = Instance::new(Some(&app_info), &required_extensions, None).unwrap();
+        // First physical device to draw on
+        let physical = PhysicalDevice::enumerate(&instance).next().unwrap();
+
         // Create event loop for window context
         let event_loop = EventLoop::new();
-        // Create a new window context and attach to App
-        self.current_context = Some(unsafe {
-            ContextBuilder::new()
-                .build_windowed(
-                    WindowBuilder::new()
-                        .with_title(&self.title)
-                        .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height))
-                        .with_resizable(self.is_resizable)
-                        .with_visible(self.is_visible)
-                        .with_decorations(self.is_decorated)
-                        .with_maximized(self.is_maximized),
-                    &event_loop,
-                )
-                .unwrap()
-                .make_current()
-                .unwrap()
-        });
+        // Contains both window and Vulkan surface
+        self.surface = Some(
+            WindowBuilder::new()
+                .with_title(&self.title)
+                .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height))
+                .with_resizable(self.is_resizable)
+                .with_visible(self.is_visible)
+                .with_decorations(self.is_decorated)
+                .with_maximized(self.is_maximized)
+                .build_vk_surface(&event_loop, instance.clone())
+                .unwrap(),
+        );
 
         // User-defined initialization
         if let Some(init) = init {
@@ -459,11 +487,6 @@ impl App {
                     if let Some(render) = &render {
                         render(&mut self);
                     }
-                    self.current_context
-                        .as_ref()
-                        .unwrap()
-                        .swap_buffers()
-                        .unwrap();
                 }
                 _ => (),
             }

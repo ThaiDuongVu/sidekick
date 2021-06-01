@@ -9,4 +9,6 @@ edition = "2018"
 [dependencies]
 glutin = "0.26.0"
 crossterm = "0.19.0"
-rgx = "0.8.1"
+vulkano = "0.20"
+vulkano-shaders = "0.20"
+vulkano-win = "0.20"
