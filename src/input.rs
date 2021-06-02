@@ -2,7 +2,7 @@ use crate::types::vector2::Vector2;
 use glutin::dpi::PhysicalPosition;
 use glutin::event::{ElementState, KeyboardInput};
 
-// Input manager
+/// Input manager
 pub struct Input {
     current_keys_down: Vec<u32>,
     key_down_buffer: u32,
@@ -14,7 +14,7 @@ pub struct Input {
     is_mouse_entered: bool,
 }
 
-// Keyboard keys to check for input
+/// Keyboard keys to check for input
 pub enum Key {
     Esc = 1,
     Num1 = 2,
@@ -96,7 +96,7 @@ pub enum Key {
     Meta = 57435,
 }
 
-// Different mouse buttons
+/// Different mouse buttons
 pub enum MouseButton {
     Left = 1,
     Right = 2,
@@ -104,7 +104,7 @@ pub enum MouseButton {
 }
 
 impl Input {
-    // Default constructor to initialize Input
+    /// Default constructor to initialize Input
     pub fn new() -> Self {
         return Self {
             current_keys_down: Vec::new(),
@@ -118,16 +118,16 @@ impl Input {
         };
     }
 
-    // Return whether a key is being held down
+    /// Return whether a key is being held down
     pub fn is_key_down(&mut self, key: Key) -> bool {
         return self.current_keys_down.contains(&(key as u32));
     }
-    // Return whether a key is NOT being held down
+    /// Return whether a key is NOT being held down
     pub fn is_key_up(&mut self, key: Key) -> bool {
         return !self.current_keys_down.contains(&(key as u32));
     }
 
-    // Return true for the first frame a key is pressed
+    /// Return true for the first frame a key is pressed
     pub fn on_key_down(&mut self, key: Key) -> bool {
         if self.key_down_buffer == key as u32 {
             self.key_down_buffer = 0;
@@ -135,7 +135,7 @@ impl Input {
         }
         return false;
     }
-    // Return true for the first frame a key is released
+    /// Return true for the first frame a key is released
     pub fn on_key_up(&mut self, key: Key) -> bool {
         if self.key_up_buffer == key as u32 {
             self.key_up_buffer = 0;
@@ -144,20 +144,20 @@ impl Input {
         return false;
     }
 
-    // Return whether a mouse button is being held down
+    /// Return whether a mouse button is being held down
     pub fn is_mouse_button_down(&mut self, mouse_button: MouseButton) -> bool {
         return self
             .current_mouse_buttons_down
             .contains(&(mouse_button as u32));
     }
-    // Return whether a mouse button is NOT being held down
+    /// Return whether a mouse button is NOT being held down
     pub fn is_mouse_button_up(&mut self, mouse_button: MouseButton) -> bool {
         return !self
             .current_mouse_buttons_down
             .contains(&(mouse_button as u32));
     }
 
-    // Return true for the first frame a mouse button is pressed
+    /// Return true for the first frame a mouse button is pressed
     pub fn on_mouse_button_down(&mut self, mouse_button: MouseButton) -> bool {
         if self.mouse_button_down_buffer == mouse_button as u32 {
             self.mouse_button_down_buffer = 0;
@@ -165,7 +165,7 @@ impl Input {
         }
         return false;
     }
-    // Return true for the first frame a mouse button is released
+    /// Return true for the first frame a mouse button is released
     pub fn on_mouse_button_up(&mut self, mouse_button: MouseButton) -> bool {
         if self.mouse_button_up_buffer == mouse_button as u32 {
             self.mouse_button_up_buffer = 0;
@@ -174,22 +174,21 @@ impl Input {
         return false;
     }
 
-    // Return position of mouse cursor
+    /// Return position of mouse cursor
     pub fn mouse_position(&mut self) -> Vector2 {
         return self.mouse_position;
     }
 
-    // Return whether mouse cursor is in game window
+    /// Return whether mouse cursor is in game window
     pub fn is_mouse_entered(&mut self) -> bool {
         return self.is_mouse_entered;
     }
-    // Return whether mouse cursor is NOT in game window
+    /// Return whether mouse cursor is NOT in game window
     pub fn is_mouse_exitted(&mut self) -> bool {
         return !self.is_mouse_entered;
     }
 
-    // Update keyboard input
-    // Only meant to be called internally within sidekick
+    /// Update keyboard input. Only meant to be called internally within sidekick
     pub fn update_keyboard_input(&mut self, input: KeyboardInput) {
         if input.state == ElementState::Pressed {
             if !self.current_keys_down.contains(&input.scancode) {
@@ -203,8 +202,7 @@ impl Input {
         };
     }
 
-    // Update mouse button input
-    // Only meant to be called internally within sidekick
+    /// Update mouse button input. Only meant to be called internally within sidekick
     pub fn update_mouse_button_input(
         &mut self,
         state: ElementState,
@@ -251,8 +249,7 @@ impl Input {
         };
     }
 
-    // Update mouse position input
-    // Only meant to be called internally within sidekick
+    /// Update mouse position input. Only meant to be called internally within sidekick
     pub fn update_mouse_position_input(&mut self, position: PhysicalPosition<f64>) {
         self.mouse_position = Vector2 {
             x: position.x as f32,
@@ -260,8 +257,7 @@ impl Input {
         };
     }
 
-    // Update mouse entered/exit input
-    // Only meant to be called internally within sidekick
+    /// Update mouse entered/exit input. Only meant to be called internally within sidekick
     pub fn update_mouse_entered_input(&mut self, is_mouse_entered: bool) {
         self.is_mouse_entered = is_mouse_entered;
     }

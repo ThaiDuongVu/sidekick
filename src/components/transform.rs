@@ -1,6 +1,7 @@
 use crate::types::vector2::Vector2;
 use std::fmt;
 
+/// A component that represents the position, rotation and scale of a game object
 pub struct Transform {
     pub position: Vector2,
     pub rotation: f32,
@@ -26,7 +27,7 @@ impl Clone for Transform {
 }
 
 impl Transform {
-    // Default constructor to initialize Transform
+    /// Default constructor to initialize Transform
     pub fn new() -> Self {
         return Self {
             position: Vector2::zero(),

@@ -677,10 +677,6 @@ impl App {
                         render(&mut self);
                     }
 
-                    if recreate_swapchain {
-                        println!("Recreating swapchain");
-                    }
-
                     // Polls various fences in order to determine what the GPU has already processed, and frees the resources that are no longer needed
                     previous_frame_end.as_mut().unwrap().cleanup_finished();
                     // Whenever the window resizes we need to recreate everything dependent on the window size

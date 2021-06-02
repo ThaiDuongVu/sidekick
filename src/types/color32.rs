@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops;
 
+/// A type that holds the red, green, blue and alpha channel of a color (in 32 bit)
 pub struct Color32 {
     pub r: u32,
     pub g: u32,
@@ -242,7 +243,7 @@ impl Color32 {
         };
     }
 
-    // Color normalized so that its RGB values are between 0 and 255
+    /// Color normalized so that its RGBA values are between 0 and 255
     pub fn normalized(&mut self) -> Color32 {
         return Color32 {
             r: if self.r > 255 { 255 } else { self.r },

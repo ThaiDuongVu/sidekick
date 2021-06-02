@@ -6,6 +6,7 @@ pub enum DrawMode {
     Line,
 }
 
+/// An game object is an entity that exist in the game world
 pub struct GameObject {
     pub transform: Transform,
     pub is_visible: bool,
@@ -13,7 +14,7 @@ pub struct GameObject {
 }
 
 impl GameObject {
-    // Default constructor to initialize game object
+    /// Default constructor to initialize game object
     pub fn new() -> Self {
         return Self {
             transform: Transform::new(),
@@ -22,12 +23,12 @@ impl GameObject {
         };
     }
 
-    // Move object at movement vector
+    /// Move object at movement vector
     pub fn r#move(&mut self, movement: Vector2) {
         self.transform.position.translate(movement);
     }
 
-    // Rotate object at rotation speed
+    /// Rotate object at rotation speed
     pub fn rotate(&mut self, rotation: f32) {
         self.transform.rotation += rotation;
 
@@ -37,12 +38,12 @@ impl GameObject {
         }
     }
 
-    // Scale object at scale vector
+    /// Scale object at scale vector
     pub fn scale(&mut self, scale: Vector2) {
         self.transform.scale += scale;
     }
 
-    // Destroy current game object
+    /// Destroy current game object
     pub fn destroy(&mut self) {
         // TODO: destroy object
     }

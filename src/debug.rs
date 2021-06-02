@@ -5,7 +5,7 @@ use crossterm::{
 use std::fmt::Display;
 use std::io::stdout;
 
-// Log a message of type T to the screen of a specific color
+/// Log a message of type T to the screen of a specific color
 fn log_colored<T>(message: T, color: Color)
 where
     T: Display,
@@ -35,8 +35,7 @@ where
 pub struct Debug {}
 
 impl Debug {
-    // Log a message of type T to the screen
-    // Note that type T must implement Display trait to print
+    /// Log a message of type T to the screen. Note that type T must implement Display trait to print
     pub fn log<T>(message: T)
     where
         T: Display,
@@ -44,8 +43,7 @@ impl Debug {
         log_colored(message, Color::White);
     }
 
-    // Log a warning message of type T to the screen
-    // Note that type T must implement Display trait to print
+    /// Log a warning message of type T to the screen. Note that type T must implement Display trait to print
     pub fn log_warning<T>(&self, message: T)
     where
         T: std::fmt::Display,
@@ -53,8 +51,7 @@ impl Debug {
         log_colored(message, Color::Yellow);
     }
 
-    // Log a error message of type T to the screen
-    // Note that type T must implement Display trait to print
+    /// Log a error message of type T to the screen. Note that type T must implement Display trait to print
     pub fn log_error<T>(&self, message: T)
     where
         T: std::fmt::Display,
@@ -62,8 +59,7 @@ impl Debug {
         log_colored(message, Color::Red);
     }
 
-    // Log a error message of type T to the screen
-    // Note that type T must implement Display trait to print
+    /// Log a error message of type T to the screen. Note that type T must implement Display trait to print
     pub fn log_success<T>(&self, message: T)
     where
         T: std::fmt::Display,
