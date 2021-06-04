@@ -1,3 +1,4 @@
+use crate::entities::game_view::GameView;
 use crate::input::Input;
 use crate::rendering::vertex::Vertex;
 use crate::time::Time;
@@ -105,6 +106,7 @@ pub struct App {
     control_flow: Option<*mut ControlFlow>,
     pub input: Input,
     pub time: Time,
+    pub game_view: GameView,
 }
 
 #[allow(deprecated)]
@@ -129,6 +131,7 @@ impl App {
             control_flow: None,
             input: Input::new(),
             time: Time::new(),
+            game_view: GameView::new(),
         };
     }
 
@@ -715,7 +718,13 @@ impl App {
                         }
 
                         // Specify the color to clear the framebuffer with i.e. blue
-                        let clear_values = vec![[0.0, 0.0, 1.0, 1.0].into()];
+                        let clear_values = vec![[
+                            self.game_view.color.r,
+                            self.game_view.color.g,
+                            self.game_view.color.b,
+                            self.game_view.color.a,
+                        ]
+                        .into()];
                         // Build a command buffer
                         let mut builder = AutoCommandBufferBuilder::primary_one_time_submit(
                             device.clone(),

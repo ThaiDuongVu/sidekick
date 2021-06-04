@@ -1,3 +1,4 @@
+use crate::types::color::Color;
 use std::fmt;
 use std::ops;
 
@@ -250,6 +251,16 @@ impl Color32 {
             g: if self.g > 255 { 255 } else { self.g },
             b: if self.b > 255 { 255 } else { self.b },
             a: if self.a > 255 { 255 } else { self.a },
+        };
+    }
+
+    /// Covert color32 to color
+    pub fn to_color(&self) -> Color {
+        return Color {
+            r: (self.r / 255) as f32,
+            g: (self.g / 255) as f32,
+            b: (self.b / 255) as f32,
+            a: (self.a / 255) as f32,
         };
     }
 }
