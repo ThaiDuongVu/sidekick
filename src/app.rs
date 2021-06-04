@@ -2,6 +2,7 @@ use crate::entities::game_view::GameView;
 use crate::input::Input;
 use crate::rendering::vertex::Vertex;
 use crate::time::Time;
+use crate::types::vector2::Vector2;
 
 use std::borrow::Cow;
 use std::sync::Arc;
@@ -172,6 +173,13 @@ impl App {
             .unwrap()
             .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
+    }
+    /// Return current App screen size
+    pub fn size(&self) -> Vector2 {
+        return Vector2 {
+            x: self.width as f32,
+            y: self.height as f32,
+        };
     }
 
     /// Set App screen title
@@ -364,7 +372,7 @@ impl App {
         return self.is_focused;
     }
 
-    /// App request for user attention
+    /// Request for user attention
     pub fn request_attention(&mut self, attention_type: AttentionType) {
         self.surface
             .as_ref()
@@ -376,7 +384,7 @@ impl App {
             });
     }
 
-    /// Quit App
+    /// Quit current App
     pub fn quit(&mut self) {
         if let Some(control_flow) = self.control_flow {
             unsafe { *control_flow = ControlFlow::Exit }
@@ -675,11 +683,6 @@ impl App {
                     self.time.update();
                 }
                 Event::RedrawRequested(_) => {
-                    // User-defined render
-                    if let Some(render) = &render {
-                        render(&mut self);
-                    }
-
                     // Polls various fences in order to determine what the GPU has already processed, and frees the resources that are no longer needed
                     previous_frame_end.as_mut().unwrap().cleanup_finished();
                     // Whenever the window resizes we need to recreate everything dependent on the window size
@@ -717,7 +720,7 @@ impl App {
                             recreate_swapchain = true;
                         }
 
-                        // Specify the color to clear the framebuffer with i.e. blue
+                        // Specify the color to clear the framebuffer with
                         let clear_values = vec![[
                             self.game_view.color.r,
                             self.game_view.color.g,
@@ -740,6 +743,7 @@ impl App {
                                 clear_values,
                             )
                             .unwrap()
+                            // Draw loop
                             .draw(
                                 pipeline.clone(),
                                 &dynamic_state,
@@ -778,6 +782,11 @@ impl App {
                                 previous_frame_end = Some(sync::now(device.clone()).boxed());
                             }
                         }
+                    }
+
+                    // User-defined render
+                    if let Some(render) = &render {
+                        render(&mut self);
                     }
                 }
                 _ => (),
