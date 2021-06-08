@@ -244,7 +244,7 @@ impl Color32 {
         };
     }
 
-    // Color normalized so that its RGB values are between 0 and 255
+    /// Color normalized so that its RGBA values are between 0 and 255
     pub fn normalized(&mut self) -> Color32 {
         return Color32 {
             r: if self.r > 255 { 255 } else { self.r },
