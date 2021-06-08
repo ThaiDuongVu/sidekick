@@ -2,7 +2,7 @@
 
 <img src="images/logo.png"/>
 
-2D game framework, written entirely in Rust.
+2D Vulkan game framework, written entirely in Rust.
 
 ---
 
@@ -19,7 +19,7 @@
 
 ### About
 
-**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that will allow developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and Vulkan as the rendering backend (the Vulkan side is not yet implemented).
+**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that will allow developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and Vulkan as the rendering backend (the Vulkan side is continuously being implemented).
 
 **sidekick** supports Windows, Linux and macOS (although untested properly on macOS, sorry I don't have a mac 😓).
 
@@ -103,14 +103,15 @@ To create a basic sidekick app:
         use sidekick::app::App;
 
         fn main() {
+            let init = move |app: &mut App| {};
+            let update = move |app: &mut App| {};
+            let render = move |app: &mut App| {};
+            let exit = move |app: &mut App| {};
+
             let app = App::new();
-            app.run(
-                None::<fn(&mut App)>,
-                None::<fn(&mut App)>,
-                None::<fn(&mut App)>,
-                None::<fn(&mut App)>,
-            );
+            app.run(init, update, render, exit);
         }
+
 ```
 
 4. Build and run the project with `cargo run`.
