@@ -12,7 +12,7 @@ use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{CursorIcon, UserAttentionType, Window, WindowBuilder};
 
-use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
+use vulkano::buffer::CpuAccessibleBuffer;
 use vulkano::command_buffer::{AutoCommandBufferBuilder, DynamicState, SubpassContents};
 use vulkano::device::{Device, DeviceExtensions};
 use vulkano::framebuffer::{Framebuffer, FramebufferAbstract, RenderPassAbstract, Subpass};
@@ -22,8 +22,8 @@ use vulkano::pipeline::viewport::Viewport;
 use vulkano::pipeline::GraphicsPipeline;
 use vulkano::swapchain;
 use vulkano::swapchain::{
-    AcquireError, ColorSpace, FullscreenExclusive, PresentMode, SurfaceTransform, Swapchain,
-    SwapchainCreationError,
+    AcquireError, ColorSpace, FullscreenExclusive, PresentMode, Surface, SurfaceTransform,
+    Swapchain, SwapchainCreationError,
 };
 use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
@@ -103,14 +103,19 @@ pub struct App {
     is_mouse_visible: bool,
     mouse_icon: MouseIcon,
     is_focused: bool,
-    surface: Option<std::sync::Arc<vulkano::swapchain::Surface<glutin::window::Window>>>,
+
+    surface: Option<Arc<Surface<Window>>>,
     control_flow: Option<*mut ControlFlow>,
+    pub vertex_buffers: Vec<Arc<CpuAccessibleBuffer<[Vertex]>>>,
+    pub device: Option<Arc<Device>>,
+
     pub input: Input,
     pub time: Time,
     pub game_view: GameView,
 }
 
 #[allow(deprecated)]
+#[allow(unused_assignments)]
 impl App {
     /// Default constructor to initialize App
     pub fn new() -> Self {
@@ -128,8 +133,12 @@ impl App {
             is_mouse_visible: DEFAULT_CURSOR_VISIBILITY,
             mouse_icon: MouseIcon::Default,
             is_focused: DEFAULT_FOCUS,
+
             surface: None,
             control_flow: None,
+            vertex_buffers: Vec::new(),
+            device: None,
+
             input: Input::new(),
             time: Time::new(),
             game_view: GameView::new(),
@@ -392,17 +401,12 @@ impl App {
     }
 
     /// Run App
-    pub fn run<I, U, R, E>(
-        mut self,
-        init: Option<I>,
-        update: Option<U>,
-        render: Option<R>,
-        exit: Option<E>,
-    ) where
-        I: Fn(&mut App) + 'static,
-        U: Fn(&mut App) + 'static,
-        R: Fn(&mut App) + 'static,
-        E: Fn(&mut App) + 'static,
+    pub fn run<I, U, R, E>(mut self, mut init: I, mut update: U, mut render: R, mut exit: E)
+    where
+        I: FnMut(&mut App) + 'static,
+        U: FnMut(&mut App) + 'static,
+        R: FnMut(&mut App) + 'static,
+        E: FnMut(&mut App) + 'static,
     {
         // Create an instance
         // Get list of required extensions
@@ -460,6 +464,7 @@ impl App {
             [(queue_family, 0.5)].iter().cloned(),
         )
         .unwrap();
+        self.device = Some(device);
         // Retrieve first queue from queues iterator
         let queue = queues.next().unwrap();
         // Create a swapchain to allocates color buffers
@@ -487,7 +492,7 @@ impl App {
 
             // Create swapchain
             Swapchain::new(
-                device.clone(),
+                self.device.as_ref().unwrap().clone(),
                 self.surface.as_ref().unwrap().clone(),
                 capabilities.min_image_count,
                 format,
@@ -505,28 +510,28 @@ impl App {
             .unwrap()
         };
         // Vertex buffer to store triangle points
-        let vertex_buffer = {
-            vulkano::impl_vertex!(Vertex, positions);
-            CpuAccessibleBuffer::from_iter(
-                device.clone(),
-                BufferUsage::all(),
-                false,
-                [
-                    Vertex {
-                        positions: [-0.5, -0.25],
-                    },
-                    Vertex {
-                        positions: [0.0, 0.5],
-                    },
-                    Vertex {
-                        positions: [0.25, -0.1],
-                    },
-                ]
-                .iter()
-                .cloned(),
-            )
-            .unwrap()
-        };
+        // let vertex_buffer: std::sync::Arc<CpuAccessibleBuffer<[Vertex]>> = {
+        //     vulkano::impl_vertex!(Vertex, positions);
+        //     CpuAccessibleBuffer::from_iter(
+        //         self.device.as_ref().unwrap().clone(),
+        //         BufferUsage::all(),
+        //         false,
+        //         [
+        //             Vertex {
+        //                 positions: [-0.5, -0.25],
+        //             },
+        //             Vertex {
+        //                 positions: [0.0, 0.5],
+        //             },
+        //             Vertex {
+        //                 positions: [0.25, -0.1],
+        //             },
+        //         ]
+        //         .iter()
+        //         .cloned(),
+        //     )
+        //     .unwrap()
+        // };
         // Vertex shader to render triangle
         // TODO: Extract this into its own file
         mod vs {
@@ -556,13 +561,13 @@ impl App {
             }
         }
 
-        let vs = vs::Shader::load(device.clone()).unwrap();
-        let fs = fs::Shader::load(device.clone()).unwrap();
+        let vs = vs::Shader::load(self.device.as_ref().unwrap().clone()).unwrap();
+        let fs = fs::Shader::load(self.device.as_ref().unwrap().clone()).unwrap();
 
         // Create a render pass, which  describes where the output of the graphics pipeline will go
         let render_pass = Arc::new(
             vulkano::single_pass_renderpass!(
-                device.clone(),
+                self.device.as_ref().unwrap().clone(),
                 attachments: {
                     color: {
                         // Clear the content of this attachment at the start of the drawing
@@ -598,7 +603,7 @@ impl App {
                 .fragment_shader(fs.main_entry_point(), ())
                 // Indicate which subpass of which render pass this pipeline is going to be used in. The pipeline will only be usable from this particular subpass.
                 .render_pass(Subpass::from(render_pass.clone(), 0).unwrap())
-                .build(device.clone())
+                .build(self.device.as_ref().unwrap().clone())
                 .unwrap(),
         );
         // Dynamic viewports allow us to recreate just the viewport when the window is resized
@@ -617,12 +622,10 @@ impl App {
         // Recreate a new swapchain in case the current one gets invalid
         let mut recreate_swapchain = true;
         // The submission of the previous frame
-        let mut previous_frame_end = Some(sync::now(device.clone()).boxed());
+        let mut previous_frame_end = Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
 
         // User-defined initialization
-        if let Some(init) = init {
-            init(&mut self);
-        }
+        init(&mut self);
 
         // Main program loop
         event_loop.run(move |event, _, control_flow| {
@@ -630,17 +633,13 @@ impl App {
             self.control_flow = Some(control_flow);
 
             // User-defined update
-            if let Some(update) = &update {
-                update(&mut self);
-            }
+            update(&mut self);
 
             // Poll for events in main loop
             match event {
                 Event::LoopDestroyed => {
                     // User-defined exit
-                    if let Some(exit) = &exit {
-                        exit(&mut self);
-                    }
+                    exit(&mut self);
                     return;
                 }
                 Event::WindowEvent { event, .. } => match event {
@@ -728,36 +727,38 @@ impl App {
                             self.game_view.color.a,
                         ]
                         .into()];
-                        // Build a command buffer
-                        let mut builder = AutoCommandBufferBuilder::primary_one_time_submit(
-                            device.clone(),
-                            queue.family(),
-                        )
-                        .unwrap();
 
-                        builder
-                            // Enter the render pass
+                        // Begin building a command buffer
+                        let mut command_buffer_builder =
+                            AutoCommandBufferBuilder::primary_one_time_submit(
+                                self.device.as_ref().unwrap().clone(),
+                                queue.family(),
+                            )
+                            .unwrap();
+
+                        // Enter the render pass
+                        command_buffer_builder
                             .begin_render_pass(
                                 frame_buffers[image_num].clone(),
                                 SubpassContents::Inline,
                                 clear_values,
                             )
-                            .unwrap()
-                            // Draw loop
-                            .draw(
-                                pipeline.clone(),
-                                &dynamic_state,
-                                vertex_buffer.clone(),
-                                (),
-                                (),
-                            )
-                            .unwrap()
-                            // Exit the render pass
-                            .end_render_pass()
                             .unwrap();
 
-                        // Finish building the command buffer
-                        let command_buffer = builder.build().unwrap();
+                        // User-defined render
+                        render(&mut self);
+
+                        // Draw loop
+                        for buffer in &self.vertex_buffers {
+                            command_buffer_builder
+                                .draw(pipeline.clone(), &dynamic_state, buffer.clone(), (), ())
+                                .unwrap();
+                        }
+                        // Exit the render pass
+                        command_buffer_builder.end_render_pass().unwrap();
+
+                        // Build the command buffer
+                        let command_buffer = command_buffer_builder.build().unwrap();
 
                         let future = previous_frame_end
                             .take()
@@ -775,18 +776,15 @@ impl App {
                             }
                             Err(FlushError::OutOfDate) => {
                                 recreate_swapchain = true;
-                                previous_frame_end = Some(sync::now(device.clone()).boxed());
+                                previous_frame_end =
+                                    Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
                             }
                             Err(e) => {
                                 println!("Failed to flush future: {:?}", e);
-                                previous_frame_end = Some(sync::now(device.clone()).boxed());
+                                previous_frame_end =
+                                    Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
                             }
                         }
-                    }
-
-                    // User-defined render
-                    if let Some(render) = &render {
-                        render(&mut self);
                     }
                 }
                 _ => (),
