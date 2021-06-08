@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+/// Game time manager
 pub struct Time {
     pub time_scale: f32,
     pub target_frame_rate: u32,
@@ -10,7 +11,7 @@ pub struct Time {
 }
 
 impl Time {
-    // Default constructor to initialize Time
+    /// Default constructor to initialize Time
     pub fn new() -> Self {
         return Self {
             frame_time: 0.0,
@@ -21,21 +22,20 @@ impl Time {
             start: Instant::now(),
         };
     }
-    // Return current frame time
+    /// Return current frame time
     pub fn frame_time(&self) -> f32 {
         return self.frame_time;
     }
-    // Return frame time at 60fps
+    /// Return frame time at 60fps
     pub fn fixed_frame_time(&self) -> f32 {
         return 1.0 / 60.0;
     }
-    // Return current frame rate
+    /// Return current frame rate
     pub fn frame_rate(&self) -> u32 {
         return (1.0 / self.frame_time) as u32;
     }
 
-    // Update frame time
-    // Is called every update iteration
+    /// Update frame time, is called every update iteration
     pub fn update(&mut self) {
         // Get current time
         self.current_time = self.start.elapsed().as_secs_f32();
