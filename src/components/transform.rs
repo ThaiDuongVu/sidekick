@@ -5,7 +5,7 @@ use std::fmt;
 pub struct Transform {
     pub position: Vector2,
     pub rotation: f32,
-    pub scale: Vector2,
+    pub size: Vector2,
 }
 
 impl fmt::Display for Transform {
@@ -13,7 +13,7 @@ impl fmt::Display for Transform {
         write!(
             formatter,
             "Position: {} \nRotation: {} \nScale: {}",
-            self.position, self.rotation, self.scale
+            self.position, self.rotation, self.size
         )
     }
 }
@@ -32,7 +32,7 @@ impl Transform {
         return Self {
             position: Vector2::zero(),
             rotation: 0.0,
-            scale: Vector2::identity(),
+            size: Vector2 { x: 50.0, y: 50.0 },
         };
     }
 }

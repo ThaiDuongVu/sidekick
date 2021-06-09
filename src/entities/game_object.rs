@@ -11,6 +11,7 @@ pub struct GameObject {
     pub transform: Transform,
     pub is_visible: bool,
     pub is_parallax: bool,
+    pub is_bounded: bool,
 }
 
 impl GameObject {
@@ -20,6 +21,7 @@ impl GameObject {
             transform: Transform::new(),
             is_visible: true,
             is_parallax: false,
+            is_bounded: false,
         };
     }
 
@@ -38,9 +40,9 @@ impl GameObject {
         }
     }
 
-    /// Scale object at scale vector
+    /// Scale object width and height
     pub fn scale(&mut self, scale: Vector2) {
-        self.transform.scale += scale;
+        self.transform.size += scale;
     }
 
     /// Destroy current game object

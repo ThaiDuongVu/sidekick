@@ -509,29 +509,6 @@ impl App {
             )
             .unwrap()
         };
-        // Vertex buffer to store triangle points
-        // let vertex_buffer: std::sync::Arc<CpuAccessibleBuffer<[Vertex]>> = {
-        //     vulkano::impl_vertex!(Vertex, positions);
-        //     CpuAccessibleBuffer::from_iter(
-        //         self.device.as_ref().unwrap().clone(),
-        //         BufferUsage::all(),
-        //         false,
-        //         [
-        //             Vertex {
-        //                 positions: [-0.5, -0.25],
-        //             },
-        //             Vertex {
-        //                 positions: [0.0, 0.5],
-        //             },
-        //             Vertex {
-        //                 positions: [0.25, -0.1],
-        //             },
-        //         ]
-        //         .iter()
-        //         .cloned(),
-        //     )
-        //     .unwrap()
-        // };
         // Vertex shader to render triangle
         // TODO: Extract this into its own file
         mod vs {
@@ -634,6 +611,110 @@ impl App {
 
             // User-defined update
             update(&mut self);
+            self.surface.as_ref().unwrap().window().request_redraw();
+            let mut redraw = || {
+                // Polls various fences in order to determine what the GPU has already processed, and frees the resources that are no longer needed
+                previous_frame_end.as_mut().unwrap().cleanup_finished();
+                // Whenever the window resizes we need to recreate everything dependent on the window size
+                // Get the new dimensions of the window
+                let dimensions: [u32; 2] =
+                    self.surface.as_ref().unwrap().window().inner_size().into();
+                let (new_swapchain, new_images) =
+                    match swapchain.recreate_with_dimensions(dimensions) {
+                        Ok(r) => r,
+                        Err(SwapchainCreationError::UnsupportedDimensions) => return,
+                        Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
+                    };
+
+                swapchain = new_swapchain;
+                // Because framebuffers contains an Arc on the old swapchain, we need to recreate framebuffers as well
+                frame_buffers = window_size_dependent_setup(
+                    &new_images,
+                    render_pass.clone(),
+                    &mut dynamic_state,
+                );
+                recreate_swapchain = false;
+
+                // Acquire an image from the swapchain. If no image is available, then the function will block
+                let (image_num, suboptimal, acquire_future) =
+                    match swapchain::acquire_next_image(swapchain.clone(), None) {
+                        Ok(r) => r,
+                        Err(AcquireError::OutOfDate) => {
+                            recreate_swapchain = true;
+                            return;
+                        }
+                        Err(e) => panic!("Failed to acquire next image: {:?}", e),
+                    };
+                if suboptimal {
+                    recreate_swapchain = true;
+                }
+
+                // Specify the color to clear the framebuffer with
+                let clear_values = vec![[
+                    self.game_view.color.r,
+                    self.game_view.color.g,
+                    self.game_view.color.b,
+                    self.game_view.color.a,
+                ]
+                .into()];
+
+                // Begin building a command buffer
+                let mut command_buffer_builder = AutoCommandBufferBuilder::primary_one_time_submit(
+                    self.device.as_ref().unwrap().clone(),
+                    queue.family(),
+                )
+                .unwrap();
+
+                // Enter the render pass
+                command_buffer_builder
+                    .begin_render_pass(
+                        frame_buffers[image_num].clone(),
+                        SubpassContents::Inline,
+                        clear_values,
+                    )
+                    .unwrap();
+
+                // User-defined render
+                render(&mut self);
+
+                // Draw loop
+                for buffer in &self.vertex_buffers {
+                    command_buffer_builder
+                        .draw(pipeline.clone(), &dynamic_state, buffer.clone(), (), ())
+                        .unwrap();
+                }
+                // Exit the render pass
+                command_buffer_builder.end_render_pass().unwrap();
+
+                // Build the command buffer
+                let command_buffer = command_buffer_builder.build().unwrap();
+
+                let future = previous_frame_end
+                    .take()
+                    .unwrap()
+                    .join(acquire_future)
+                    .then_execute(queue.clone(), command_buffer)
+                    .unwrap()
+                    // Submits a present command at the end of the queue
+                    .then_swapchain_present(queue.clone(), swapchain.clone(), image_num)
+                    .then_signal_fence_and_flush();
+
+                match future {
+                    Ok(future) => {
+                        previous_frame_end = Some(future.boxed());
+                    }
+                    Err(FlushError::OutOfDate) => {
+                        recreate_swapchain = true;
+                        previous_frame_end =
+                            Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
+                    }
+                    Err(e) => {
+                        println!("Failed to flush future: {:?}", e);
+                        previous_frame_end =
+                            Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
+                    }
+                }
+            };
 
             // Poll for events in main loop
             match event {
@@ -682,110 +763,7 @@ impl App {
                     self.time.update();
                 }
                 Event::RedrawRequested(_) => {
-                    // Polls various fences in order to determine what the GPU has already processed, and frees the resources that are no longer needed
-                    previous_frame_end.as_mut().unwrap().cleanup_finished();
-                    // Whenever the window resizes we need to recreate everything dependent on the window size
-                    if recreate_swapchain {
-                        // Get the new dimensions of the window
-                        let dimensions: [u32; 2] =
-                            self.surface.as_ref().unwrap().window().inner_size().into();
-                        let (new_swapchain, new_images) =
-                            match swapchain.recreate_with_dimensions(dimensions) {
-                                Ok(r) => r,
-                                Err(SwapchainCreationError::UnsupportedDimensions) => return,
-                                Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
-                            };
-
-                        swapchain = new_swapchain;
-                        // Because framebuffers contains an Arc on the old swapchain, we need to recreate framebuffers as well
-                        frame_buffers = window_size_dependent_setup(
-                            &new_images,
-                            render_pass.clone(),
-                            &mut dynamic_state,
-                        );
-                        recreate_swapchain = false;
-
-                        // Acquire an image from the swapchain. If no image is available, then the function will block
-                        let (image_num, suboptimal, acquire_future) =
-                            match swapchain::acquire_next_image(swapchain.clone(), None) {
-                                Ok(r) => r,
-                                Err(AcquireError::OutOfDate) => {
-                                    recreate_swapchain = true;
-                                    return;
-                                }
-                                Err(e) => panic!("Failed to acquire next image: {:?}", e),
-                            };
-                        if suboptimal {
-                            recreate_swapchain = true;
-                        }
-
-                        // Specify the color to clear the framebuffer with
-                        let clear_values = vec![[
-                            self.game_view.color.r,
-                            self.game_view.color.g,
-                            self.game_view.color.b,
-                            self.game_view.color.a,
-                        ]
-                        .into()];
-
-                        // Begin building a command buffer
-                        let mut command_buffer_builder =
-                            AutoCommandBufferBuilder::primary_one_time_submit(
-                                self.device.as_ref().unwrap().clone(),
-                                queue.family(),
-                            )
-                            .unwrap();
-
-                        // Enter the render pass
-                        command_buffer_builder
-                            .begin_render_pass(
-                                frame_buffers[image_num].clone(),
-                                SubpassContents::Inline,
-                                clear_values,
-                            )
-                            .unwrap();
-
-                        // User-defined render
-                        render(&mut self);
-
-                        // Draw loop
-                        for buffer in &self.vertex_buffers {
-                            command_buffer_builder
-                                .draw(pipeline.clone(), &dynamic_state, buffer.clone(), (), ())
-                                .unwrap();
-                        }
-                        // Exit the render pass
-                        command_buffer_builder.end_render_pass().unwrap();
-
-                        // Build the command buffer
-                        let command_buffer = command_buffer_builder.build().unwrap();
-
-                        let future = previous_frame_end
-                            .take()
-                            .unwrap()
-                            .join(acquire_future)
-                            .then_execute(queue.clone(), command_buffer)
-                            .unwrap()
-                            // Submits a present command at the end of the queue
-                            .then_swapchain_present(queue.clone(), swapchain.clone(), image_num)
-                            .then_signal_fence_and_flush();
-
-                        match future {
-                            Ok(future) => {
-                                previous_frame_end = Some(future.boxed());
-                            }
-                            Err(FlushError::OutOfDate) => {
-                                recreate_swapchain = true;
-                                previous_frame_end =
-                                    Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
-                            }
-                            Err(e) => {
-                                println!("Failed to flush future: {:?}", e);
-                                previous_frame_end =
-                                    Some(sync::now(self.device.as_ref().unwrap().clone()).boxed());
-                            }
-                        }
-                    }
+                    redraw();
                 }
                 _ => (),
             }
