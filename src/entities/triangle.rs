@@ -14,7 +14,7 @@ pub struct Triangle {
     pub color: Color,
 
     vertex_buffer: Option<Arc<CpuAccessibleBuffer<[Vertex]>>>,
-    index: usize,
+    vertex_buffer_index: usize,
 }
 
 impl Triangle {
@@ -25,8 +25,67 @@ impl Triangle {
             color: Color::white(),
 
             vertex_buffer: None,
-            index: 0,
+            vertex_buffer_index: 0,
         };
+    }
+
+    /// Calculate vertex's position based on current rotation
+    fn calculate_rotation(&mut self, app: &mut App, vertex: Vector2) -> Vector2 {
+        // Sine & Cosine of current rotation
+        let sin: f32 = self.game_object.transform.rotation.to_radians().sin();
+        let cos: f32 = self.game_object.transform.rotation.to_radians().cos();
+        // Point of rotation
+        let x_point: f32 = self.game_object.transform.position.x;
+        let y_point: f32 = self.game_object.transform.position.y;
+        // Current vertex point
+        let vertex_x: f32 = vertex.x * (app.width() as f32 / 2.0);
+        let vertex_y: f32 = vertex.y * (app.height() as f32 / 2.0);
+        // Rotate vertex vector to match with current rotation
+        return Vector2 {
+            x: x_point,
+            y: y_point,
+        } + Vector2 {
+            x: cos * (vertex_x - x_point) - sin * (vertex_y - y_point),
+            y: sin * (vertex_x - x_point) + cos * (vertex_y - y_point),
+        } / Vector2 {
+            x: app.width() as f32 / 2.0,
+            y: app.height() as f32 / 2.0,
+        };
+    }
+    /// Bound triangle's vertices within game view
+    fn calculate_bound(&mut self, app: &mut App) {
+        // If object is not bounded then do not calculate
+        if !self.game_object.is_bounded {
+            return;
+        }
+
+        // Bound horizontally
+        let x_left_bound: f32 = -(app.width() as f32 / 2.0)
+            + (self.game_object.transform.size.x
+                * (self.game_object.transform.rotation.sin()
+                    + self.game_object.transform.rotation.cos()))
+                / 2.0;
+        let x_right_bound: f32 = -x_left_bound;
+
+        if self.game_object.transform.position.x < x_left_bound {
+            self.game_object.transform.position.x = x_left_bound;
+        } else if self.game_object.transform.position.x > x_right_bound {
+            self.game_object.transform.position.x = x_right_bound;
+        }
+
+        // Bound vertically
+        let y_lower_bound: f32 = -(app.height() as f32 / 2.0)
+            + (self.game_object.transform.size.y
+                * (self.game_object.transform.rotation.sin()
+                    + self.game_object.transform.rotation.cos()))
+                / 2.0;
+        let y_upper_bound: f32 = -y_lower_bound;
+
+        if self.game_object.transform.position.y < y_lower_bound {
+            self.game_object.transform.position.y = y_lower_bound;
+        } else if self.game_object.transform.position.y > y_upper_bound {
+            self.game_object.transform.position.y = y_upper_bound;
+        }
     }
 
     /// Update triangle vertices
@@ -75,7 +134,7 @@ impl Triangle {
             },
         );
 
-        // vertex_0 = self.calculate_rotation(app, vertex_0);
+        self.calculate_bound(app);
 
         // Implement vertex buffer to store triangle points
         self.vertex_buffer = Some({
@@ -105,29 +164,6 @@ impl Triangle {
         });
     }
 
-    /// Calculate vertex's position based on current rotation
-    fn calculate_rotation(&mut self, app: &mut App, vertex: Vector2) -> Vector2 {
-        // Sine & Cosine of current rotation
-        let sin: f32 = self.game_object.transform.rotation.to_radians().sin();
-        let cos: f32 = self.game_object.transform.rotation.to_radians().cos();
-        // Point of rotation
-        let x_point: f32 = self.game_object.transform.position.x;
-        let y_point: f32 = self.game_object.transform.position.y;
-        // Current vertex point
-        let vertex_x: f32 = vertex.x * (app.width() as f32 / 2.0);
-        let vertex_y: f32 = vertex.y * (app.height() as f32 / 2.0);
-        // Rotate vertex vector to match with current rotation
-        return Vector2 {
-            x: x_point,
-            y: y_point,
-        } + Vector2 {
-            x: cos * (vertex_x - x_point) - sin * (vertex_y - y_point),
-            y: sin * (vertex_x - x_point) + cos * (vertex_y - y_point),
-        } / Vector2 {
-            x: app.width() as f32 / 2.0,
-            y: app.height() as f32 / 2.0,
-        };
-    }
     /// Render triangle on screen
     pub fn draw(&mut self, app: &mut App) {
         // Do not render anything if object is not visible
@@ -139,11 +175,11 @@ impl Triangle {
 
         // Add current vertex buffer to app's vector of vertex buffers
         if app.vertex_buffers.len() > 0 {
-            app.vertex_buffers.remove(self.index);
+            app.vertex_buffers.remove(self.vertex_buffer_index);
         }
         app.vertex_buffers
             .push(self.vertex_buffer.as_ref().unwrap().clone());
         // Reset index of current vertex buffer in vector
-        self.index = app.vertex_buffers.len() - 1;
+        self.vertex_buffer_index = app.vertex_buffers.len() - 1;
     }
 }

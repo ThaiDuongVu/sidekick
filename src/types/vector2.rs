@@ -187,6 +187,9 @@ impl Vector2 {
     }
     /// Normalize vector so that its length is 1
     pub fn normalized(&mut self) -> Vector2 {
+        if self.x == 0.0 && self.y == 0.0 {
+            return Vector2::zero();
+        }
         return Vector2 {
             x: (1.0 / self.length()) * self.x,
             y: (1.0 / self.length()) * self.y,
