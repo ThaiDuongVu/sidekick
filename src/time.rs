@@ -3,7 +3,7 @@ use std::time::Instant;
 /// Game time manager
 pub struct Time {
     pub time_scale: f32,
-    pub target_frame_rate: u32,
+    pub target_frame_rate: f32,
     frame_time: f32,
     previous_time: f32,
     current_time: f32,
@@ -18,7 +18,7 @@ impl Time {
             time_scale: 1.0,
             previous_time: 0.0,
             current_time: 0.0,
-            target_frame_rate: 60,
+            target_frame_rate: 60.0,
             start: Instant::now(),
         };
     }
@@ -46,8 +46,8 @@ impl Time {
 
         // Busy wait for frame to pass before next update
         while self.start.elapsed().as_secs_f32()
-            < self.current_time + (1.0 / (self.target_frame_rate as f32))
+            < self.current_time + (1.0 / self.target_frame_rate)
         {}
-        self.current_time += 1.0 / (self.target_frame_rate as f32);
+        self.current_time += 1.0 / self.target_frame_rate;
     }
 }
