@@ -19,7 +19,7 @@
 
 ### About
 
-**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that will allow developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and Vulkan as the rendering backend (the Vulkan side is continuously being implemented).
+**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that allows developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and [rgx](https://github.com/cloudhead/rgx) as the rendering engine.
 
 **sidekick** supports Windows, Linux and macOS (although untested properly on macOS, sorry I don't have a mac 😓).
 
@@ -60,11 +60,10 @@
 - Intuitive and Accessible.
 - Fast and Easy to get started.
 - 100% Rust.
-- Performant.
-- Comprehensive Documentation.
+- Performance.
 - Cross-platform.
 
-#### Non-goals (some of these might get implemented if requested 🤔)
+#### Non-goals (some of these might get implemented if heavily requested 🤔)
 - 3D Rendering.
 - UI Editor.
 
@@ -89,7 +88,7 @@ Please make sure that you follow [the Rust API Guidelines](https://rust-lang.git
 
 To create a basic sidekick app:
 
-1. Create a new project with Cargo by typing `cargo new project-name --bin`.
+1. Create a new project with Cargo using `cargo new project-name --bin`.
 
 2. In your `Cargo.toml`, add:
 
@@ -103,10 +102,14 @@ To create a basic sidekick app:
         use sidekick::app::App;
 
         fn main() {
-            let init = move |app: &mut App| {};
-            let update = move |app: &mut App| {};
-            let render = move |app: &mut App| {};
-            let exit = move |app: &mut App| {};
+            // Intialize before first frame update
+            let init = move |_app: &mut App| {};
+            // Update once every frame
+            let update = move |_app: &mut App| {};
+            // Render game objects
+            let render = move |_app: &mut App| {};
+            // Clean up before game exit
+            let exit = move |_app: &mut App| {};
 
             let app = App::new();
             app.run(init, update, render, exit);
