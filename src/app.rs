@@ -6,8 +6,10 @@ use crate::types::vector2::Vector2;
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
-use glutin::window::{CursorIcon, UserAttentionType, WindowBuilder};
-use glutin::ContextBuilder;
+use glutin::window::{CursorIcon, UserAttentionType, Window};
+
+use rgx::core::*;
+use rgx::kit;
 
 /// Types of attention to request user
 pub enum AttentionType {
@@ -84,7 +86,7 @@ pub struct App {
     mouse_icon: MouseIcon,
     is_focused: bool,
 
-    current_context: Option<glutin::WindowedContext<glutin::PossiblyCurrent>>,
+    window: Option<Window>,
     control_flow: Option<*mut ControlFlow>,
 
     pub input: Input,
@@ -112,7 +114,7 @@ impl App {
             mouse_icon: MouseIcon::Default,
             is_focused: DEFAULT_FOCUS,
 
-            current_context: None,
+            window: None,
             control_flow: None,
 
             input: Input::new(),
@@ -124,10 +126,9 @@ impl App {
     /// Set App screen width
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
     /// Return current App screen width
@@ -138,10 +139,9 @@ impl App {
     /// Set App screen height
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
     /// Return current App screen height
@@ -153,10 +153,9 @@ impl App {
     pub fn set_size(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_inner_size(PhysicalSize::new(self.width, self.height));
     }
     /// Return current App screen size
@@ -170,11 +169,7 @@ impl App {
     /// Set App screen title
     pub fn set_title(&mut self, title: &str) {
         self.title = String::from(title);
-        self.current_context
-            .as_ref()
-            .unwrap()
-            .window()
-            .set_title(&self.title);
+        self.window.as_ref().unwrap().set_title(&self.title);
     }
     /// Return App screen title
     pub fn title(&self) -> &str {
@@ -184,10 +179,9 @@ impl App {
     /// Set whether App is resizable
     pub fn set_resizable(&mut self, is_resizable: bool) {
         self.is_resizable = is_resizable;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_resizable(self.is_resizable);
     }
     /// Return whether App is resizable
@@ -198,11 +192,7 @@ impl App {
     /// Set whether App is visible
     pub fn set_visible(&mut self, is_visible: bool) {
         self.is_visible = is_visible;
-        self.current_context
-            .as_ref()
-            .unwrap()
-            .window()
-            .set_visible(self.is_visible);
+        self.window.as_ref().unwrap().set_visible(self.is_visible);
     }
     /// Return whether App is visible
     pub fn is_visible(&self) -> bool {
@@ -212,10 +202,9 @@ impl App {
     /// Set whether App is minimized
     pub fn set_minimized(&mut self, is_minimized: bool) {
         self.is_minimized = is_minimized;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_minimized(self.is_minimized);
     }
     /// Return whether App is minimized
@@ -226,10 +215,9 @@ impl App {
     /// Set whether App is maximized
     pub fn set_maximized(&mut self, is_maximized: bool) {
         self.is_minimized = is_maximized;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_minimized(self.is_maximized);
     }
     /// Return whether App is maximized
@@ -240,10 +228,9 @@ impl App {
     /// Set whether App is decorated
     pub fn set_decorated(&mut self, is_decorated: bool) {
         self.is_decorated = is_decorated;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_decorations(self.is_decorated);
     }
     /// Return whether App is decorated
@@ -254,10 +241,9 @@ impl App {
     /// Set whether App is always on top
     pub fn set_always_on_top(&mut self, is_always_on_top: bool) {
         self.is_always_on_top = is_always_on_top;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_always_on_top(self.is_always_on_top);
     }
     /// Return whether App is always on top
@@ -269,10 +255,9 @@ impl App {
     pub fn set_mouse_confined(&mut self, is_mouse_confined: bool) {
         self.is_mouse_confined = is_mouse_confined;
         match self
-            .current_context
+            .window
             .as_ref()
             .unwrap()
-            .window()
             .set_cursor_grab(self.is_mouse_confined)
         {
             Ok(_) => {}
@@ -289,10 +274,9 @@ impl App {
     /// Set whether mouse cursor is visible
     pub fn set_mouse_visible(&mut self, is_mouse_visible: bool) {
         self.is_mouse_visible = is_mouse_visible;
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .set_cursor_visible(self.is_mouse_visible);
     }
     /// Return whether mouse cursor is visible
@@ -341,11 +325,7 @@ impl App {
         };
         self.mouse_icon = mouse_icon;
 
-        self.current_context
-            .as_ref()
-            .unwrap()
-            .window()
-            .set_cursor_icon(icon);
+        self.window.as_ref().unwrap().set_cursor_icon(icon);
     }
     /// Return current mouse icon
     pub fn mouse_icon(self) -> MouseIcon {
@@ -359,10 +339,9 @@ impl App {
 
     /// Request for user attention
     pub fn request_attention(&mut self, attention_type: AttentionType) {
-        self.current_context
+        self.window
             .as_ref()
             .unwrap()
-            .window()
             .request_user_attention(match attention_type {
                 AttentionType::Critical => Some(UserAttentionType::Critical),
                 AttentionType::Informational => Some(UserAttentionType::Informational),
@@ -387,22 +366,35 @@ impl App {
         // Create event loop for window context
         let event_loop = EventLoop::new();
         // Create a new window context and attach to App
-        self.current_context = Some(unsafe {
-            ContextBuilder::new()
-                .build_windowed(
-                    WindowBuilder::new()
-                        .with_title(&self.title)
-                        .with_inner_size(glutin::dpi::PhysicalSize::new(self.width, self.height))
-                        .with_resizable(self.is_resizable)
-                        .with_visible(self.is_visible)
-                        .with_decorations(self.is_decorated)
-                        .with_maximized(self.is_maximized),
-                    &event_loop,
-                )
-                .unwrap()
-                .make_current()
-                .unwrap()
-        });
+        self.window = Some(Window::new(&event_loop).unwrap());
+        self.window.as_ref().unwrap().set_title(&self.title);
+        self.window
+            .as_ref()
+            .unwrap()
+            .set_inner_size(PhysicalSize::new(self.width, self.height));
+        self.window
+            .as_ref()
+            .unwrap()
+            .set_resizable(self.is_resizable);
+        self.window.as_ref().unwrap().set_visible(self.is_visible);
+        self.window
+            .as_ref()
+            .unwrap()
+            .set_decorations(self.is_decorated);
+        self.window
+            .as_ref()
+            .unwrap()
+            .set_maximized(self.is_maximized);
+
+        // Setup renderer
+        let mut renderer = Renderer::new(self.window.as_ref().unwrap()).unwrap();
+        // Setup render pipeline
+        let pipeline: kit::sprite2d::Pipeline = renderer.pipeline(Blending::default());
+        let mut textures = renderer.swap_chain(
+            self.size().x as u32,
+            self.size().y as u32,
+            PresentMode::default(),
+        );
 
         // User-defined initialization
         init(&mut self);
@@ -456,6 +448,29 @@ impl App {
                     WindowEvent::CloseRequested => self.quit(),
                     _ => (),
                 },
+                Event::MainEventsCleared => {
+                    let output = textures.next();
+                    let mut frame = renderer.frame();
+                    // Update render pipeline
+                    renderer.update_pipeline(
+                        &pipeline,
+                        kit::ortho(output.width, output.height, Default::default()),
+                        &mut frame,
+                    );
+                    {
+                        let mut pass = frame.pass(
+                            PassOp::Clear(Rgba::new(
+                                self.game_view.color.r,
+                                self.game_view.color.g,
+                                self.game_view.color.b,
+                                self.game_view.color.a,
+                            )),
+                            &output,
+                        );
+                        pass.set_pipeline(&pipeline);
+                    }
+                    renderer.present(frame);
+                }
                 Event::RedrawEventsCleared => {
                     // Update frame time before next update iteration
                     self.time.update();
@@ -463,11 +478,6 @@ impl App {
                 Event::RedrawRequested(_) => {
                     // User-defined render
                     render(&mut self);
-                    self.current_context
-                        .as_ref()
-                        .unwrap()
-                        .swap_buffers()
-                        .unwrap();
                 }
                 _ => (),
             }
