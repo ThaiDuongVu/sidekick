@@ -11,7 +11,7 @@ use glutin::window::{CursorIcon, UserAttentionType, Window};
 use rgx::core::*;
 use rgx::kit;
 use rgx::kit::shape2d::{Batch, Shape};
-use rgx::math::Point2;
+use rgx::math::*;
 
 /// Types of attention to request user
 pub enum AttentionType {
@@ -391,7 +391,7 @@ impl App {
         // Setup renderer
         let mut renderer = Renderer::new(self.window.as_ref().unwrap()).unwrap();
         // Setup render pipeline
-        let pipeline: kit::sprite2d::Pipeline = renderer.pipeline(Blending::default());
+        let pipeline: kit::shape2d::Pipeline = renderer.pipeline(Blending::default());
         let mut textures = renderer.swap_chain(
             self.window.as_ref().unwrap().inner_size().width as u32,
             self.window.as_ref().unwrap().inner_size().height as u32,
@@ -466,8 +466,8 @@ impl App {
                     let mut batch = Batch::new();
 
                     // User-defined render
-                    // render(&mut self);
-                    
+                    render(&mut self);
+
                     // Add shapes to render batch
                     batch.add(
                         Shape::circle(Point2::new(0.0, 0.0), 50.0, 32)
@@ -489,13 +489,12 @@ impl App {
                     {
                         let pass = &mut frame.pass(
                             PassOp::Clear(Rgba::new(
-                                0.0, 0.0, 0.0, 1.0
-                                // self.game_view.color.r,
-                                // self.game_view.color.g,
-                                // self.game_view.color.b,
-                                // self.game_view.color.a,
+                                self.game_view.color.r,
+                                self.game_view.color.g,
+                                self.game_view.color.b,
+                                self.game_view.color.a,
                             )),
-                            &output
+                            &output,
                         );
                         pass.set_pipeline(&pipeline);
                         pass.draw_buffer(&buffer);
