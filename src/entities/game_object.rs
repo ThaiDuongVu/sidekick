@@ -6,12 +6,20 @@ pub enum DrawMode {
     Line,
 }
 
-/// An game object is an entity that exist in the game world
+/// A game object is an entity that exist in the game world
 pub struct GameObject {
     pub transform: Transform,
     pub is_visible: bool,
     pub is_parallax: bool,
     pub is_bounded: bool,
+}
+
+impl Copy for GameObject {}
+
+impl Clone for GameObject {
+    fn clone(&self) -> GameObject {
+        *self
+    }
 }
 
 impl GameObject {

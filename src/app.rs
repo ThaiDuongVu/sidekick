@@ -4,12 +4,14 @@ use crate::time::Time;
 use crate::types::vector2::Vector2;
 
 use glutin::dpi::PhysicalSize;
-use glutin::event::{Event, WindowEvent};
+use glutin::event::{Event, StartCause, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{CursorIcon, UserAttentionType, Window};
 
 use rgx::core::*;
 use rgx::kit;
+use rgx::kit::shape2d::{Batch, Shape};
+use rgx::math::Point2;
 
 /// Types of attention to request user
 pub enum AttentionType {
@@ -391,8 +393,8 @@ impl App {
         // Setup render pipeline
         let pipeline: kit::sprite2d::Pipeline = renderer.pipeline(Blending::default());
         let mut textures = renderer.swap_chain(
-            self.size().x as u32,
-            self.size().y as u32,
+            self.window.as_ref().unwrap().inner_size().width as u32,
+            self.window.as_ref().unwrap().inner_size().height as u32,
             PresentMode::default(),
         );
 
@@ -409,19 +411,29 @@ impl App {
 
             // Poll for events in main loop
             match event {
+                Event::NewEvents(StartCause::Init) => {
+                    self.window.as_ref().unwrap().request_redraw();
+                    *control_flow = ControlFlow::Wait;
+                }
                 Event::LoopDestroyed => {
                     // User-defined exit
                     exit(&mut self);
                     return;
                 }
                 Event::WindowEvent { event, .. } => match event {
+                    WindowEvent::Resized(size) => {
+                        textures = renderer.swap_chain(
+                            size.width as u32,
+                            size.height as u32,
+                            PresentMode::default(),
+                        );
+                    }
                     // Handle keyboard input
                     WindowEvent::KeyboardInput {
                         device_id: _,
                         input,
                         is_synthetic: _,
                     } => self.input.update_keyboard_input(input),
-
                     // Handle mouse button input
                     WindowEvent::MouseInput {
                         device_id: _,
@@ -429,7 +441,6 @@ impl App {
                         button,
                         modifiers: _,
                     } => self.input.update_mouse_button_input(state, button),
-
                     // Handle mouse position input
                     WindowEvent::CursorMoved {
                         device_id: _,
@@ -443,43 +454,55 @@ impl App {
                     WindowEvent::CursorLeft { device_id: _ } => {
                         self.input.update_mouse_entered_input(false)
                     }
-
                     WindowEvent::Focused(is_focused) => self.is_focused = is_focused,
                     WindowEvent::CloseRequested => self.quit(),
-                    _ => (),
+                    _ => {}
                 },
-                Event::MainEventsCleared => {
-                    let output = textures.next();
+                Event::RedrawEventsCleared => {
+                    // Update frame time before next update iteration
+                    self.time.update();
+                }
+                Event::RedrawRequested(_) => {
+                    let mut batch = Batch::new();
+
+                    // User-defined render
+                    // render(&mut self);
+                    
+                    // Add shapes to render batch
+                    batch.add(
+                        Shape::circle(Point2::new(0.0, 0.0), 50.0, 32)
+                            .stroke(1.0, Rgba::new(1.0, 1.0, 1.0, 1.0)),
+                    );
+                    let buffer = batch.finish(&renderer);
+
                     let mut frame = renderer.frame();
+                    let output = textures.next();
+
                     // Update render pipeline
                     renderer.update_pipeline(
                         &pipeline,
                         kit::ortho(output.width, output.height, Default::default()),
                         &mut frame,
                     );
+
+                    // Draw frame
                     {
-                        let mut pass = frame.pass(
+                        let pass = &mut frame.pass(
                             PassOp::Clear(Rgba::new(
-                                self.game_view.color.r,
-                                self.game_view.color.g,
-                                self.game_view.color.b,
-                                self.game_view.color.a,
+                                0.0, 0.0, 0.0, 1.0
+                                // self.game_view.color.r,
+                                // self.game_view.color.g,
+                                // self.game_view.color.b,
+                                // self.game_view.color.a,
                             )),
-                            &output,
+                            &output
                         );
                         pass.set_pipeline(&pipeline);
+                        pass.draw_buffer(&buffer);
                     }
                     renderer.present(frame);
                 }
-                Event::RedrawEventsCleared => {
-                    // Update frame time before next update iteration
-                    self.time.update();
-                }
-                Event::RedrawRequested(_) => {
-                    // User-defined render
-                    render(&mut self);
-                }
-                _ => (),
+                _ => {}
             }
         });
     }
