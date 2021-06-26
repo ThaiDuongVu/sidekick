@@ -11,7 +11,6 @@ use glutin::window::{CursorIcon, UserAttentionType, Window};
 use rgx::core::*;
 use rgx::kit;
 use rgx::kit::shape2d::{Batch, Shape};
-use rgx::math::*;
 
 /// Types of attention to request user
 pub enum AttentionType {
@@ -90,6 +89,7 @@ pub struct App {
 
     window: Option<Window>,
     control_flow: Option<*mut ControlFlow>,
+    pub shapes: Vec<Shape>,
 
     pub input: Input,
     pub time: Time,
@@ -118,6 +118,7 @@ impl App {
 
             window: None,
             control_flow: None,
+            shapes: Vec::new(),
 
             input: Input::new(),
             time: Time::new(),
@@ -412,6 +413,9 @@ impl App {
             // Poll for events in main loop
             match event {
                 Event::NewEvents(StartCause::Init) => {
+                    // Update frame time before next update iteration
+                    self.time.update();
+
                     self.window.as_ref().unwrap().request_redraw();
                     *control_flow = ControlFlow::Wait;
                 }
@@ -458,21 +462,18 @@ impl App {
                     WindowEvent::CloseRequested => self.quit(),
                     _ => {}
                 },
-                Event::RedrawEventsCleared => {
-                    // Update frame time before next update iteration
-                    self.time.update();
-                }
+                Event::MainEventsCleared => {}
+                Event::RedrawEventsCleared => {}
                 Event::RedrawRequested(_) => {
                     let mut batch = Batch::new();
 
                     // User-defined render
                     render(&mut self);
 
-                    // Add shapes to render batch
-                    batch.add(
-                        Shape::circle(Point2::new(0.0, 0.0), 50.0, 32)
-                            .stroke(1.0, Rgba::new(1.0, 1.0, 1.0, 1.0)),
-                    );
+                    for shape in self.shapes.clone() {
+                        batch.add(shape);
+                    }
+
                     let buffer = batch.finish(&renderer);
 
                     let mut frame = renderer.frame();

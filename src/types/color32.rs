@@ -243,6 +243,14 @@ impl Color32 {
             a: 255,
         };
     }
+    pub fn transparent() -> Self {
+        return Self {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0,
+        };
+    }
 
     /// Color normalized so that its RGBA values are between 0 and 255
     pub fn normalized(&mut self) -> Color32 {

@@ -6,6 +6,7 @@ pub struct Transform {
     pub position: Vector2,
     pub rotation: f32,
     pub size: Vector2,
+    pub radius: f32,
 }
 
 impl fmt::Display for Transform {
@@ -33,6 +34,7 @@ impl Transform {
             position: Vector2::zero(),
             rotation: 0.0,
             size: Vector2 { x: 50.0, y: 50.0 },
+            radius: 50.0,
         };
     }
 }
