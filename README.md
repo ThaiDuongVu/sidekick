@@ -46,6 +46,7 @@
 - Text Rendering.
 - Sprite Rendering.
 - Audio Playing.
+- Animations.
 - 2D Physics.
 - 2D Lighting & Shadow.
 - Profiling Tools.
