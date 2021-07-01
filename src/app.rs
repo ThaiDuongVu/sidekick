@@ -359,12 +359,9 @@ impl App {
     }
 
     /// Run App
-    pub fn run<I, U, R, E>(mut self, mut init: I, mut update: U, mut render: R, mut exit: E)
+    pub fn run<T>(mut self, mut update: T)
     where
-        I: FnMut(&mut App) + 'static,
-        U: FnMut(&mut App) + 'static,
-        R: FnMut(&mut App) + 'static,
-        E: FnMut(&mut App) + 'static,
+        T: FnMut(&mut App) -> () + 'static,
     {
         // Create event loop for window context
         let event_loop = EventLoop::new();
@@ -399,29 +396,21 @@ impl App {
             PresentMode::default(),
         );
 
-        // User-defined initialization
-        init(&mut self);
-
         // Main program loop
         event_loop.run(move |event, _, control_flow| {
             *control_flow = ControlFlow::Poll;
             self.control_flow = Some(control_flow);
 
-            // User-defined update
+            // User-defined udpate
             update(&mut self);
 
             // Poll for events in main loop
             match event {
                 Event::NewEvents(StartCause::Init) => {
-                    // Update frame time before next update iteration
-                    self.time.update();
-
                     self.window.as_ref().unwrap().request_redraw();
                     *control_flow = ControlFlow::Wait;
                 }
                 Event::LoopDestroyed => {
-                    // User-defined exit
-                    exit(&mut self);
                     return;
                 }
                 Event::WindowEvent { event, .. } => match event {
@@ -462,13 +451,15 @@ impl App {
                     WindowEvent::CloseRequested => self.quit(),
                     _ => {}
                 },
-                Event::MainEventsCleared => {}
-                Event::RedrawEventsCleared => {}
+                Event::MainEventsCleared => {
+                    // Update frame time
+                    self.time.update();
+                }
+                Event::RedrawEventsCleared => {
+                    self.window.as_ref().unwrap().request_redraw();
+                }
                 Event::RedrawRequested(_) => {
                     let mut batch = Batch::new();
-
-                    // User-defined render
-                    render(&mut self);
 
                     for shape in self.shapes.clone() {
                         batch.add(shape);

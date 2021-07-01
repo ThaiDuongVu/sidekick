@@ -103,19 +103,14 @@ To create a basic sidekick app:
         use sidekick::app::App;
 
         fn main() {
-            // Intialize before first frame update
-            let init = move |_app: &mut App| {};
-            // Update once every frame
-            let update = move |_app: &mut App| {};
-            // Render game objects
-            let render = move |_app: &mut App| {};
-            // Clean up before game exit
-            let exit = move |_app: &mut App| {};
+                // Create a sidekick app
+                let app = App::new();
 
-            let app = App::new();
-            app.run(init, update, render, exit);
+                // Initialize everything before run here
+
+                // Run app
+                app.run(move |_app| {});
         }
-
 ```
 
 4. Build and run the project with `cargo run`.
