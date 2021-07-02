@@ -45,9 +45,9 @@ impl Time {
         self.previous_time = self.current_time;
 
         // Busy wait for frame to pass before next update
-        while self.start.elapsed().as_secs_f32()
-            < self.current_time + (1.0 / self.target_frame_rate)
-        {}
-        self.current_time += 1.0 / self.target_frame_rate;
+        // while self.start.elapsed().as_secs_f32()
+        //     < self.current_time + (1.0 / self.target_frame_rate)
+        // {}
+        // self.current_time += 1.0 / self.target_frame_rate;
     }
 }

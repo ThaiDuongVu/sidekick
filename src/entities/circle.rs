@@ -4,7 +4,7 @@ use crate::types::color::Color;
 
 use rgx::core::*;
 use rgx::kit::shape2d::{Fill, Shape};
-use rgx::math::*;
+use rgx::math::Point2;
 
 /// A circle 🤷‍♂️
 pub struct Circle {
@@ -33,7 +33,7 @@ impl Circle {
             game_object: GameObject::new(),
 
             fill_color: Color::white(),
-            stroke_size: 0.0,
+            stroke_size: 0.,
             stroke_color: Color::white(),
 
             index: 0,
@@ -49,11 +49,13 @@ impl Circle {
             self.is_init = true;
         }
 
+        // TODO: Implement parallax and bound for object position
+
         app.shapes.push(
             Shape::circle(
                 Point2::new(
-                    self.game_object.transform.position.x,
-                    self.game_object.transform.position.y,
+                    self.game_object.transform.position.x + app.width() as f32 / 2.,
+                    self.game_object.transform.position.y + app.height() as f32 / 2.,
                 ),
                 self.game_object.transform.radius,
                 32,

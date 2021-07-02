@@ -359,9 +359,10 @@ impl App {
     }
 
     /// Run App
-    pub fn run<T>(mut self, mut update: T)
+    pub fn run<I, U>(mut self, mut init: I, mut update: U)
     where
-        T: FnMut(&mut App) -> () + 'static,
+        I: FnMut(&mut App) -> () + 'static,
+        U: FnMut(&mut App) -> () + 'static,
     {
         // Create event loop for window context
         let event_loop = EventLoop::new();
@@ -395,6 +396,9 @@ impl App {
             self.window.as_ref().unwrap().inner_size().height as u32,
             PresentMode::default(),
         );
+
+        // User-defined init
+        init(&mut self);
 
         // Main program loop
         event_loop.run(move |event, _, control_flow| {

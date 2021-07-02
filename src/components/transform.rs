@@ -34,7 +34,7 @@ impl Transform {
             position: Vector2::zero(),
             rotation: 0.0,
             size: Vector2 { x: 50.0, y: 50.0 },
-            radius: 50.0,
+            radius: 25.0,
         };
     }
 }

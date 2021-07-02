@@ -204,8 +204,8 @@ impl Vector2 {
         return self.x * other.x + self.y * other.y;
     }
     /// Translate current vector with another vector
-    pub fn translate(&mut self, difference: Vector2) {
-        self.x += difference.x;
-        self.y += difference.y;
+    pub fn translate(&mut self, delta: Vector2) {
+        self.x += delta.x;
+        self.y += delta.y;
     }
 }

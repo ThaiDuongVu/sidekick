@@ -155,9 +155,9 @@ impl Input {
     /// Return value of vertical input axis
     pub fn get_axis_vertical(&mut self) -> f32 {
         let wasd: f32 =
-            (self.is_key_down(Key::S) as i32 as f32) - (self.is_key_down(Key::W) as i32 as f32);
-        let arrows: f32 =
-            (self.is_key_down(Key::Down) as i32 as f32) - (self.is_key_down(Key::Up) as i32 as f32);
+            -(self.is_key_down(Key::S) as i32 as f32) + (self.is_key_down(Key::W) as i32 as f32);
+        let arrows: f32 = -(self.is_key_down(Key::Down) as i32 as f32)
+            + (self.is_key_down(Key::Up) as i32 as f32);
         return (wasd + arrows).clamp(-1.0, 1.0);
     }
 
