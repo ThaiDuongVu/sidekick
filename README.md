@@ -109,7 +109,7 @@ To create a basic sidekick app:
                 // Initialize everything before run here
 
                 // Run app
-                app.run(move |_app| {});
+                app.run(move |_app| {}, move |_app| {});
         }
 ```
 
