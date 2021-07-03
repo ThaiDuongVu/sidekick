@@ -102,13 +102,18 @@ To create a basic sidekick app:
         use sidekick::app::App;
 
         fn main() {
-                // Create a sidekick app
-                let app = App::new();
+            // Create a sidekick app
+            let app = App::new();
+            
+            // Initialize app before first frame update
+            // Note: Dynamic environment should be initialized outside of init
+            let init = move |app: &mut App| {};
+            
+            // Update and render game objects every frame
+            let update = move |app: &mut App| {};
 
-                // Initialize everything before run here
-
-                // Run app
-                app.run(move |_app| {}, move |_app| {});
+            // Run app
+            app.run(init, update);
         }
 ```
 
