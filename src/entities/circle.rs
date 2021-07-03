@@ -51,11 +51,25 @@ impl Circle {
 
         // TODO: Implement parallax and bound for object position
 
+        let x = self.game_object.transform.position.x;
+        let y = self.game_object.transform.position.y;
+
+        let viewport_x = if self.game_object.is_parallax {
+            0.
+        } else {
+            app.game_view.game_object.transform.position.x
+        };
+        let viewport_y = if self.game_object.is_parallax {
+            0.
+        } else {
+            app.game_view.game_object.transform.position.y
+        };
+
         app.shapes.push(
             Shape::circle(
                 Point2::new(
-                    self.game_object.transform.position.x + app.width() as f32 / 2.,
-                    self.game_object.transform.position.y + app.height() as f32 / 2.,
+                    x + app.width() as f32 / 2. - viewport_x / 2.,
+                    y + app.height() as f32 / 2. - viewport_y / 2.,
                 ),
                 self.game_object.transform.radius,
                 32,
