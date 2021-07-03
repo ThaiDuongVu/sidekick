@@ -42,7 +42,7 @@
 #### Planned features
 - Custom Math & Logic Library
 - Gamepad Input Handling.
-- Basic Shapes Rendering (Line, Triangle, Square).
+- Basic Shapes Rendering (Line, Triangle, Square, etc.).
 - Text Rendering.
 - Sprite Rendering.
 - Audio Playing.
@@ -57,10 +57,9 @@
 
 ### Goals and Non-goals
 
-#### Goals (Order from most to least important)
+#### Goals (Order from most important)
 - Intuitive and Accessible.
 - Fast and Easy to get started.
-- 100% Rust.
 - Performance.
 - Cross-platform.
 
