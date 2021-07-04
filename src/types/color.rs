@@ -177,6 +177,29 @@ impl Color {
         };
     }
 
+    // Convert color format from HEX to RGB
+    pub fn from_hex(hex: &str) -> Self {
+        if hex.len() != 6 {
+            return Color {
+                r: 0.,
+                g: 0.,
+                b: 0.,
+                a: 1.,
+            };
+        } else {
+            let r = u32::from_str_radix(&hex[0..2], 16).unwrap();
+            let g = u32::from_str_radix(&hex[2..4], 16).unwrap();
+            let b = u32::from_str_radix(&hex[4..6], 16).unwrap();
+
+            return Color {
+                r: r as f32 / 255.,
+                g: g as f32 / 255.,
+                b: b as f32 / 255.,
+                a: 1.,
+            };
+        }
+    }
+
     // Unit colors
     pub fn red() -> Self {
         return Self {

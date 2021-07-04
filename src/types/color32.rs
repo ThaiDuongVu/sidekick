@@ -178,6 +178,29 @@ impl Color32 {
         };
     }
 
+    // Convert color format from HEX to RGB
+    pub fn from_hex(hex: &str) -> Self {
+        if hex.len() != 6 {
+            return Color32 {
+                r: 0,
+                g: 0,
+                b: 0,
+                a: 255,
+            };
+        } else {
+            let r = u32::from_str_radix(&hex[0..2], 16).unwrap();
+            let g = u32::from_str_radix(&hex[2..4], 16).unwrap();
+            let b = u32::from_str_radix(&hex[4..6], 16).unwrap();
+
+            return Color32 {
+                r: r,
+                g: g,
+                b: b,
+                a: 255,
+            };
+        }
+    }
+
     // Unit colors
     pub fn red() -> Self {
         return Color32 {
