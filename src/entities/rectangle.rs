@@ -1,5 +1,6 @@
 use crate::app::App;
 use crate::entities::game_object::GameObject;
+use crate::entities::game_object::RenderLayer;
 use crate::types::color::Color;
 use crate::types::vector2::Vector2;
 
@@ -15,7 +16,7 @@ pub struct Rectangle {
     pub fill_color: Color,
     pub stroke_size: f32,
     pub stroke_color: Color,
-    pub layer: f32,
+    pub layer: RenderLayer,
 
     index: usize,
     is_init: bool,
@@ -38,7 +39,7 @@ impl Rectangle {
             fill_color: Color::white(),
             stroke_size: 0.,
             stroke_color: Color::white(),
-            layer: 0.,
+            layer: RenderLayer::Layer1,
 
             index: 0,
             is_init: false,
@@ -52,8 +53,6 @@ impl Rectangle {
         } else {
             self.is_init = true;
         }
-
-        // TODO: Clamp layer to be between 0 and -1
 
         let x = self.game_object.transform.position.x;
         let y = self.game_object.transform.position.y;
@@ -128,7 +127,7 @@ impl Rectangle {
                     self.game_object.transform.rotation,
                     Point2::new(center.x, center.y),
                 )
-                .zdepth(ZDepth::from(self.layer)),
+                .zdepth(ZDepth::from(self.layer as i32 as f32 / 10.)),
         );
     }
 }

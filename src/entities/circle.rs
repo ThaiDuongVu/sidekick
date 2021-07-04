@@ -1,9 +1,11 @@
 use crate::app::App;
 use crate::entities::game_object::GameObject;
+use crate::entities::game_object::RenderLayer;
 use crate::types::color::Color;
 
 use rgx::core::*;
 use rgx::kit::shape2d::{Fill, Shape};
+use rgx::kit::ZDepth;
 use rgx::math::Point2;
 
 /// A circle 🤷‍♂️
@@ -13,6 +15,7 @@ pub struct Circle {
     pub fill_color: Color,
     pub stroke_size: f32,
     pub stroke_color: Color,
+    pub layer: RenderLayer,
 
     index: usize,
     is_init: bool,
@@ -35,6 +38,7 @@ impl Circle {
             fill_color: Color::white(),
             stroke_size: 0.,
             stroke_color: Color::white(),
+            layer: RenderLayer::Layer1,
 
             index: 0,
             is_init: false,
@@ -49,10 +53,10 @@ impl Circle {
             self.is_init = true;
         }
 
-        // TODO: Implement parallax and bound for object position
-
         let x = self.game_object.transform.position.x;
         let y = self.game_object.transform.position.y;
+
+        let radius = self.game_object.transform.radius;
 
         let viewport_x = if self.game_object.is_parallax {
             0.
@@ -64,6 +68,25 @@ impl Circle {
         } else {
             app.game_view.game_object.transform.position.y
         };
+
+        // Bound object in game view
+        if self.game_object.is_bounded {
+            let max_x = app.width() as f32 / 2. - radius + viewport_x / 2.;
+            let min_x = -(app.width() as f32) / 2. + radius + viewport_x / 2.;
+            if x > max_x {
+                self.game_object.transform.position.x = max_x;
+            } else if x < min_x {
+                self.game_object.transform.position.x = min_x;
+            }
+
+            let max_y = app.height() as f32 / 2. - radius + viewport_y / 2.;
+            let min_y = -(app.height() as f32) / 2. + radius + viewport_y / 2.;
+            if y > max_y {
+                self.game_object.transform.position.y = max_y;
+            } else if y < min_y {
+                self.game_object.transform.position.y = min_y;
+            }
+        }
 
         app.shapes.push(
             Shape::circle(
@@ -88,7 +111,8 @@ impl Circle {
                     self.stroke_color.b,
                     self.stroke_color.a,
                 ),
-            ),
+            )
+            .zdepth(ZDepth::from(self.layer as i32 as f32 / 10.)),
         );
 
         self.index = app.shapes.len() - 1;

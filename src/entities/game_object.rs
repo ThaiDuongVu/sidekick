@@ -1,9 +1,25 @@
 use crate::components::transform::Transform;
 use crate::types::vector2::Vector2;
 
-pub enum DrawMode {
-    Fill,
-    Line,
+pub enum RenderLayer {
+    Layer1 = 0,
+    Layer2 = 1,
+    Layer3 = 2,
+    Layer4 = 3,
+    Layer5 = 4,
+    Layer6 = 5,
+    Layer7 = 6,
+    Layer8 = 7,
+    Layer9 = 8,
+    Layer10 = 9,
+}
+
+impl Copy for RenderLayer {}
+
+impl Clone for RenderLayer {
+    fn clone(&self) -> RenderLayer {
+        *self
+    }
 }
 
 /// A game object is an entity that exist in the game world
