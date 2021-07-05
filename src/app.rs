@@ -3,6 +3,9 @@ use crate::input::Input;
 use crate::time::Time;
 use crate::types::vector2::Vector2;
 
+use std::time::Duration;
+use std::time::Instant;
+
 use glutin::dpi::PhysicalSize;
 use glutin::event::{Event, StartCause, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
@@ -88,7 +91,7 @@ pub struct App {
     is_focused: bool,
 
     window: Option<Window>,
-    control_flow: Option<*mut ControlFlow>,
+    pub control_flow: Option<*mut ControlFlow>,
     pub shapes: Vec<Shape>,
 
     pub input: Input,
@@ -405,8 +408,24 @@ impl App {
             *control_flow = ControlFlow::Poll;
             self.control_flow = Some(control_flow);
 
-            // User-defined udpate
+            // User-defined update
             update(&mut self);
+
+            let start_time = Instant::now();
+            match *control_flow {
+                ControlFlow::Exit => (),
+                _ => {
+                    let elapsed_time = Instant::now().duration_since(start_time).as_millis() as u32;
+                    let wait_millis = match 1000 / self.time.target_frame_rate >= elapsed_time {
+                        true => 1000 / self.time.target_frame_rate - elapsed_time,
+                        false => 0,
+                    };
+                    let next_time = start_time + Duration::from_millis(wait_millis as u64);
+                    if let Some(control_flow) = self.control_flow {
+                        unsafe { *control_flow = ControlFlow::WaitUntil(next_time) }
+                    }
+                }
+            }
 
             // Poll for events in main loop
             match event {
@@ -456,11 +475,20 @@ impl App {
                     _ => {}
                 },
                 Event::MainEventsCleared => {
-                    // Update frame time
-                    self.time.update();
+                    self.window.as_ref().unwrap().request_redraw();
                 }
                 Event::RedrawEventsCleared => {
-                    self.window.as_ref().unwrap().request_redraw();
+                    // Update frame time
+                    self.time.update();
+
+                    match *control_flow {
+                        ControlFlow::Exit => (),
+                        _ => {
+                            let next_time = Instant::now()
+                                + Duration::from_secs_f32(1. / self.time.target_frame_rate as f32);
+                            *control_flow = ControlFlow::WaitUntil(next_time);
+                        }
+                    }
                 }
                 Event::RedrawRequested(_) => {
                     let mut batch = Batch::new();

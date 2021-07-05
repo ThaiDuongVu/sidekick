@@ -1,6 +1,6 @@
 use sidekick::app::App;
-use sidekick::entities::rectangle::Rectangle;
 use sidekick::entities::line::Line;
+use sidekick::entities::rectangle::Rectangle;
 use sidekick::input::Key;
 use sidekick::types::vector2::Vector2;
 
@@ -45,8 +45,8 @@ fn main() {
         });
         player_2.game_object.r#move(Vector2 {
             x: 0.,
-            y: -(app.input.is_key_down(Key::Down) as i32 as f32)
-                + (app.input.is_key_down(Key::Up) as i32 as f32),
+            y: -(app.input.is_key_down(Key::K) as i32 as f32)
+                + (app.input.is_key_down(Key::I) as i32 as f32),
         });
 
         player_1.draw(app);
