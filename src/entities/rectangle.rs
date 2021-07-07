@@ -9,7 +9,7 @@ use rgx::kit::shape2d::{Fill, Shape};
 use rgx::kit::ZDepth;
 use rgx::math::Point2;
 
-/// A rectable 🤷‍♂️
+/// A rectangle 🤷‍♂️
 pub struct Rectangle {
     pub game_object: GameObject,
 

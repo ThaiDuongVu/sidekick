@@ -121,7 +121,7 @@ fn main() {
                     ball_movement.x = -ball_movement.x;
                     ball_movement.y = rand::thread_rng().gen_range(-BALL_SPEED..BALL_SPEED);
 
-                    // TODO: Shake viewport
+                    app.game_view.start_shaking(10., 0.5, 1.);
                 }
             }
         } else if ball.game_object.transform.position.x + ball.game_object.transform.size.x / 2.
@@ -144,7 +144,7 @@ fn main() {
                     ball_movement.x = -ball_movement.x;
                     ball_movement.y = rand::thread_rng().gen_range(-BALL_SPEED..BALL_SPEED);
 
-                    // TODO: Shake viewport
+                    app.game_view.start_shaking(10., 0.5, 1.);
                 }
             }
         }

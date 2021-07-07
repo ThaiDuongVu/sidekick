@@ -410,7 +410,11 @@ impl App {
 
             // User-defined update
             update(&mut self);
-            
+            // Shake current game view if needed
+            if self.game_view.is_shaking {
+                self.game_view.shake();
+            }
+
             // Wait until next frame time to update the screen again
             // let start_time = Instant::now();
             // match *control_flow {

@@ -27,7 +27,7 @@ impl Time {
         return self.frame_time;
     }
     /// Return frame time at 60fps
-    pub fn fixed_frame_time(&self) -> f32 {
+    pub fn fixed_frame_time() -> f32 {
         return 1.0 / 60.0;
     }
     /// Return current frame rate
