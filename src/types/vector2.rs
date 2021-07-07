@@ -181,6 +181,20 @@ impl Vector2 {
         return Self { x: 0.0, y: 1.0 };
     }
 
+    // Directional vectors
+    pub fn up() -> Self {
+        return Self { x: 0.0, y: 1.0 };
+    }
+    pub fn down() -> Self {
+        return Self { x: 0.0, y: -1.0 };
+    }
+    pub fn left() -> Self {
+        return Self { x: -1.0, y: 0.0 };
+    }
+    pub fn right() -> Self {
+        return Self { x: 1.0, y: 0.0 };
+    }
+
     /// Return length of current vector
     pub fn length(&mut self) -> f32 {
         return (self.x.powi(2) + self.y.powi(2)).sqrt();

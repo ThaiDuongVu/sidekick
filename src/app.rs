@@ -410,22 +410,23 @@ impl App {
 
             // User-defined update
             update(&mut self);
-
-            let start_time = Instant::now();
-            match *control_flow {
-                ControlFlow::Exit => (),
-                _ => {
-                    let elapsed_time = Instant::now().duration_since(start_time).as_millis() as u32;
-                    let wait_millis = match 1000 / self.time.target_frame_rate >= elapsed_time {
-                        true => 1000 / self.time.target_frame_rate - elapsed_time,
-                        false => 0,
-                    };
-                    let next_time = start_time + Duration::from_millis(wait_millis as u64);
-                    if let Some(control_flow) = self.control_flow {
-                        unsafe { *control_flow = ControlFlow::WaitUntil(next_time) }
-                    }
-                }
-            }
+            
+            // Wait until next frame time to update the screen again
+            // let start_time = Instant::now();
+            // match *control_flow {
+            //     ControlFlow::Exit => (),
+            //     _ => {
+            //         let elapsed_time = Instant::now().duration_since(start_time).as_millis() as u32;
+            //         let wait_millis = match 1000 / self.time.target_frame_rate >= elapsed_time {
+            //             true => 1000 / self.time.target_frame_rate - elapsed_time,
+            //             false => 0,
+            //         };
+            //         let next_time = start_time + Duration::from_millis(wait_millis as u64);
+            //         if let Some(control_flow) = self.control_flow {
+            //             unsafe { *control_flow = ControlFlow::WaitUntil(next_time) }
+            //         }
+            //     }
+            // }
 
             // Poll for events in main loop
             match event {
@@ -476,10 +477,6 @@ impl App {
                 },
                 Event::MainEventsCleared => {
                     self.window.as_ref().unwrap().request_redraw();
-                }
-                Event::RedrawEventsCleared => {
-                    // Update frame time
-                    self.time.update();
 
                     match *control_flow {
                         ControlFlow::Exit => (),
@@ -489,6 +486,10 @@ impl App {
                             *control_flow = ControlFlow::WaitUntil(next_time);
                         }
                     }
+                }
+                Event::RedrawEventsCleared => {
+                    // Update frame time
+                    self.time.update();
                 }
                 Event::RedrawRequested(_) => {
                     let mut batch = Batch::new();
