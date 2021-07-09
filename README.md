@@ -65,7 +65,8 @@
 
 #### Non-goals (some of these might get implemented if heavily requested 🤔)
 - 3D Rendering.
-- UI Editor.
+- AAA-level Graphics.
+- GUI Editor.
 
 ---
 
@@ -127,3 +128,12 @@ To create a basic sidekick app:
 ### Tutorials and Documentation
 
 You can refer to the [wiki page](https://github.com/ThaiDuongVu/sidekick/wiki) (whenever it's live 🤷‍♂️) for an in-depth guide to **sidekick**.
+
+---
+
+### Want a feature that's currently not in sidekick's roadmap?
+
+Well first of all you can implement it yourself (the power of open source 😏).
+
+You can also go to the [issues tab](https://github.com/ThaiDuongVu/sidekick/issues) and submit a new issue (remember to add the "feature request" label).
+
