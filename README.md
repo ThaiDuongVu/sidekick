@@ -129,6 +129,8 @@ To create a basic sidekick app:
 
 You can refer to the [wiki page](https://github.com/ThaiDuongVu/sidekick/wiki) (whenever it's live 🤷‍♂️) for an in-depth guide to **sidekick**.
 
+There are a handful of [examples](./examples) to learn from. To run them simply run the command `cargo run --example example-name` where `example-name` is, well, the name of the example to run.
+
 ---
 
 ### Want a feature that's currently not in sidekick's roadmap?
