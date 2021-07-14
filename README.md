@@ -21,11 +21,12 @@
 
 **sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that allows developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and [rgx](https://github.com/cloudhead/rgx) as the rendering engine.
 
-**sidekick** supports Windows, Linux and macOS (although untested properly on macOS, sorry I don't have a mac 😓).
-
 **sidekick** is subject to change as it is actively developed so expect things to break (😅).
 
 **sidekick** is an educational project for learning purposes, feel free to use it in personal and commercial projects, just keep in mind that support is minimal.
+
+Supported platforms:
+<img src="images/windows.png" width="60"> <img src="images/linux.png" width="60"> <img src="images/macos.png" width="60">
 
 ---
 

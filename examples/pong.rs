@@ -34,7 +34,7 @@ fn main() {
 
     // Bouncy ball
     let mut ball = Rectangle::new();
-    ball.game_object.transform.size = Vector2 { x: 25., y: 25. };
+    ball.game_object.transform.size = Vector2 { x: 20., y: 20. };
     let mut ball_movement = Vector2::left();
 
     // Divider between 2 sides
