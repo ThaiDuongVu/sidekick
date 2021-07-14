@@ -410,6 +410,9 @@ impl App {
 
             // User-defined update
             update(&mut self);
+            
+            self.input.update_gamepad_event();
+
             // Shake current game view if needed
             if self.game_view.is_shaking {
                 self.game_view.shake();
