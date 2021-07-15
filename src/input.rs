@@ -3,8 +3,6 @@ use crate::types::vector2::Vector2;
 use glutin::dpi::PhysicalPosition;
 use glutin::event::{ElementState, KeyboardInput};
 
-use gilrs::Gilrs;
-
 /// Input manager
 pub struct Input {
     current_keys_down: Vec<u32>,
@@ -15,7 +13,6 @@ pub struct Input {
     mouse_button_up_buffer: u32,
     mouse_position: Vector2,
     is_mouse_entered: bool,
-    gilrs: Gilrs,
 }
 
 /// Keyboard keys to check for input
@@ -124,7 +121,6 @@ impl Input {
             mouse_button_up_buffer: 0,
             mouse_position: Vector2::new(),
             is_mouse_entered: false,
-            gilrs: Gilrs::new().unwrap(),
         };
     }
 
@@ -287,12 +283,5 @@ impl Input {
     /// Update mouse entered/exit input. Only meant to be called internally within sidekick
     pub fn update_mouse_entered_input(&mut self, is_mouse_entered: bool) {
         self.is_mouse_entered = is_mouse_entered;
-    }
-
-    /// Continously check for gamepad input
-    pub fn update_gamepad_event(&mut self) {
-        if let Some(event) = self.gilrs.next_event() {
-            println!("{:?}", event.event);
-        }
     }
 }

@@ -14,4 +14,3 @@ glutin = "0.26.0"
 rgx = { version = "0.8.1", features = ["renderer"] }
 crossterm = "0.19.0"
 rand = "0.8.4"
-gilrs = "0.8.1"
