@@ -19,7 +19,7 @@
 
 ### About
 
-**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that allows developers to create stunning 2D video games, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and [rgx](https://github.com/cloudhead/rgx) as the rendering engine.
+**sidekick** is a free and open-source game framework under the [MIT license](LICENSE) that allows developers to create stunning 2D video games, prototypes, desktop apps and everything in between. It uses [glutin](https://github.com/rust-windowing/glutin) for window context management and [rgx](https://github.com/cloudhead/rgx) as the rendering engine.
 
 **sidekick** is subject to change as it is actively developed so expect things to break (😅).
 
@@ -35,23 +35,23 @@ Supported platforms:
 #### Current features
 - Window Management
 - Cursor Management
-- Keyboard Input Handling.
-- Mouse Input Handling.
-- Game Time Management.
-- Debugging Tools.
+- Keyboard Input Handling
+- Mouse Input Handling
+- Game Time Management
+- Debugging Tools
 
 #### Planned features
 - Custom Math & Logic Library
-- Gamepad Input Handling.
-- Basic Shapes Rendering (Line, Triangle, Square, etc.).
-- Text Rendering.
-- Sprite Rendering.
-- Audio Playing.
-- Animations.
-- 2D Physics.
-- 2D Lighting & Shadow.
-- Profiling Tools.
-- Custom Test Framework.
+- Gamepad Input Handling
+- Basic Shapes Rendering (Line, Triangle, Square, etc.)
+- Text Rendering
+- Sprite Rendering
+- Audio Playing
+- Animations
+- 2D Physics
+- 2D Lighting & Shadow
+- Profiling Tools
+- Custom Test Framework
 - And more to be added...
 
 ---

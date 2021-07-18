@@ -42,11 +42,13 @@ fn main() {
     divider.stroke_size = 5.;
     divider.game_object.transform.radius = app.height() as f32 / 2.;
 
-    // Changes to dynamic environment values will not be saved if done in init
+    // Initialize app before first frame update
+    // Note: Dynamic environment should be initialized outside of init
     let init = move |app: &mut App| {
         app.set_title("Pong");
         app.set_size(WIDTH, HEIGHT);
     };
+    // Update and render game objects every frame
     let update = move |app: &mut App| {
         if app.input.on_key_down(Key::Esc) {
             app.quit();
