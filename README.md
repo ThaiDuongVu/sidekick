@@ -39,11 +39,12 @@ Supported platforms:
 - Mouse Input Handling
 - Game Time Management
 - Debugging Tools
+- Basic Shapes Rendering (Line, Triangle, Circle)
 
 #### Planned features
 - Custom Math & Logic Library
 - Gamepad Input Handling
-- Basic Shapes Rendering (Line, Triangle, Square, etc.)
+- Custom Polygonal Shape Rendering
 - Text Rendering
 - Sprite Rendering
 - Audio Playing
