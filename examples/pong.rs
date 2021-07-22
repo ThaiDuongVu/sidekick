@@ -40,7 +40,7 @@ fn main() {
     // Divider between 2 sides
     let mut divider = Line::new();
     divider.stroke_size = 5.;
-    divider.game_object.transform.radius = app.height() as f32 / 2.;
+    divider.game_object.transform.radius = HEIGHT as f32 / 2.;
 
     // Initialize app before first frame update
     // Note: Dynamic environment should be initialized outside of init
@@ -68,6 +68,10 @@ fn main() {
 
         // Ball bounce around
         ball.game_object.r#move(ball_movement);
+
+        // This section handles ball and player collisions
+        // Collision detection will be part of the core sidekick framework in the future
+        // For now just manually check positions
 
         // Ball colliding with vertical walls
         if ball.game_object.transform.position.x + ball.game_object.transform.size.x / 2.
@@ -151,6 +155,7 @@ fn main() {
             }
         }
 
+        // Render all objects to window
         divider.draw(app);
         player_1.draw(app);
         player_2.draw(app);

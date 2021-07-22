@@ -105,9 +105,7 @@ pub enum MouseButton {
 }
 
 /// Different gamepad buttons
-pub enum GamepadButton {
-
-}
+pub enum GamepadButton {}
 
 impl Input {
     /// Default constructor to initialize Input
@@ -205,10 +203,6 @@ impl Input {
     /// Return whether mouse cursor is in game window
     pub fn is_mouse_entered(&mut self) -> bool {
         return self.is_mouse_entered;
-    }
-    /// Return whether mouse cursor is NOT in game window
-    pub fn is_mouse_exitted(&mut self) -> bool {
-        return !self.is_mouse_entered;
     }
 
     /// Update keyboard input. Only meant to be called internally within sidekick

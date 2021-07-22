@@ -392,8 +392,11 @@ impl App {
 
         // Setup renderer
         let mut renderer = Renderer::new(self.window.as_ref().unwrap()).unwrap();
+        // renderer.device
+        // let swap_chain = renderer.swap_chain(self.width(), self.height(), PresentMode::default());
+
         // Setup render pipeline
-        let pipeline: kit::shape2d::Pipeline = renderer.pipeline(Blending::default());
+        let shape2d_pipeline: kit::shape2d::Pipeline = renderer.pipeline(Blending::default());
         let mut textures = renderer.swap_chain(
             self.window.as_ref().unwrap().inner_size().width as u32,
             self.window.as_ref().unwrap().inner_size().height as u32,
@@ -506,11 +509,13 @@ impl App {
                     let buffer = batch.finish(&renderer);
 
                     let mut frame = renderer.frame();
+                    // frame.encoder
+
                     let output = textures.next();
 
                     // Update render pipeline
                     renderer.update_pipeline(
-                        &pipeline,
+                        &shape2d_pipeline,
                         kit::ortho(output.width, output.height, Default::default()),
                         &mut frame,
                     );
@@ -526,7 +531,7 @@ impl App {
                             )),
                             &output,
                         );
-                        pass.set_pipeline(&pipeline);
+                        pass.set_pipeline(&shape2d_pipeline);
                         pass.draw_buffer(&buffer);
                     }
                     renderer.present(frame);
