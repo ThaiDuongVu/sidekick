@@ -55,6 +55,8 @@ Supported platforms:
 - Custom Test Framework
 - And more to be added...
 
+You can always refer to the [sidekick project board](https://github.com/ThaiDuongVu/sidekick/projects/1) for more details on features being implement.
+
 ---
 
 ### Goals and Non-goals
