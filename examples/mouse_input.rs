@@ -4,11 +4,11 @@ use sidekick::input::MouseButton;
 fn main() {
     // Create a sidekick app
     let app = App::new();
-    
+
     // Initialize app before first frame update
     // Note: Dynamic environment should be initialized outside of init
     let init = move |_app: &mut App| {};
-    
+
     // Update and render game objects every frame
     let update = move |app: &mut App| {
         // is_mouse_button_down returns true while a mouse button is being held down
