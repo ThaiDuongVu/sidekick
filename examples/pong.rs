@@ -160,6 +160,8 @@ fn main() {
         player_1.draw(app);
         player_2.draw(app);
         ball.draw(app);
+
+        // sidekick::debug::Debug::log(app.time.frame_rate());
     };
 
     // Run app

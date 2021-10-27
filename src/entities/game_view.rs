@@ -1,5 +1,4 @@
 use crate::entities::game_object::GameObject;
-use crate::time::Time;
 use crate::types::color::Color;
 use crate::types::vector2::Vector2;
 
@@ -50,9 +49,9 @@ impl GameView {
 
     /// Randomize viewport position during shake period.
     /// Note: Shaking only affects non-parallax game objects.
-    pub fn shake(&mut self) {
+    pub fn shake(&mut self, frame_time: f32) {
         // Decrease shake duration every frame
-        self.shake_duration -= Time::fixed_frame_time() * self.shake_decrease_factor;
+        self.shake_duration -= frame_time * self.shake_decrease_factor;
 
         // If shake duration runs out then stop shaking
         if self.shake_duration <= 0. {

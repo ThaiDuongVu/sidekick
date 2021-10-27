@@ -416,7 +416,7 @@ impl App {
 
             // Shake current game view if needed
             if self.game_view.is_shaking {
-                self.game_view.shake();
+                self.game_view.shake(self.time.frame_time());
             }
 
             // Wait until next frame time to update the screen again
