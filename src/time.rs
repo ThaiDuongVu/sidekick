@@ -14,11 +14,11 @@ impl Time {
     /// Default constructor to initialize Time
     pub fn new() -> Self {
         return Self {
-            frame_time: 0.0,
             time_scale: 1.0,
+            target_frame_rate: 60,
+            frame_time: 0.0,
             previous_time: 0.0,
             current_time: 0.0,
-            target_frame_rate: 60,
             start: Instant::now(),
         };
     }
@@ -45,9 +45,9 @@ impl Time {
         self.previous_time = self.current_time;
 
         // Busy wait for frame to pass before next update
-        // while self.start.elapsed().as_secs_f32()
-        //     < self.current_time + (1.0 / self.target_frame_rate as f32)
-        // {}
-        // self.current_time += 1.0 / self.target_frame_rate as f32;
+        while self.start.elapsed().as_secs_f32()
+            < self.current_time + (1. / self.target_frame_rate as f32)
+        {}
+        self.current_time += 1. / self.target_frame_rate as f32;
     }
 }
